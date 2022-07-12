@@ -20,7 +20,7 @@
     "ios": {
       "supportsTablet": true,
       "usesIcloudStorage": true,
-      "bundleIdentifier": "com.yourname.yourapp"
+      "bundleIdentifier": "com.PortalVtiger.PortalVtiger"
     },
     "android": {
       "adaptiveIcon": {
