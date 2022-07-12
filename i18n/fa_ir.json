@@ -78,7 +78,8 @@
     "Documents" : "اسناد",
     "HelpDesk" : "تیکت",
     "Browse" : "انتخاب کنید",
-    "Please Select File first" : "لطفا ابتدا فایل انتخاب کنید"
+    "Please Select File first" : "لطفا ابتدا فایل انتخاب کنید",
+    "The field \"{0}\" is mandatory." : " فیلد \"{0}\" اجباری می باشد"
   
   }
   

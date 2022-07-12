@@ -2,7 +2,8 @@
 import base64 from 'react-native-base64'
 
 let language_select = 'en_us';
-let url_base = 'http://www.mahdibagherivar.ir/vt7/modules/CustomerPortal/api.php';
+// let url_base = 'http://www.mahdibagherivar.ir/vt7/modules/CustomerPortal/api.php';
+let url_base = 'http://mahdivar.a-web.ir/modules/CustomerPortal/api.php';
 
 let languages = {
     'fa_ir' :  require('../i18n/fa_ir.json'),
@@ -96,6 +97,19 @@ export const updateLang = (lang) => {
     language_select = lang;
 }
 
+export const formatDate = (date) => {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) 
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+
+    return [year, month, day].join('-');
+}
 
 export const  ping = async (user_name,password) => {
 

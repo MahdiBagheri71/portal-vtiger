@@ -1,17 +1,55 @@
-import  { Component } from 'react'
-import {View, Text, StyleSheet  } from 'react-native'
+import React from 'react';
+import {View, Text, StyleSheet, TextInput, ScrollView  } from 'react-native'
 import { Button, Divider } from 'react-native-paper';
-import {vtranslate,describeModule} from '../../../Functions/Portal' ;
+import {vtranslate,describeModule,formatDate} from '../../../Functions/Portal' ;
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ValidationComponent from 'react-native-form-validator';
 
 import '../../../global.js' 
-class Add extends Component {
+class Add extends ValidationComponent {
 
     state = {
-        email: '',
-        password: '',
-        disableButton : false,
-        describeModule : {}
+        PortalVtigerEmail: '',
+        PortalVtigerPassword: '',
+        PortalVtigerDisableButton : false,
+        PortalVtigerDescribeModule : {},
+        PortalVtigerData : {},
+        PortalVtigerValidate : {}
+    }
+
+    constructor(props) {
+        super(props);
+        this.deviceLocale = "me"
+        this.messages = {
+            me: {
+                required: vtranslate('The field "{0}" is mandatory.'),
+                email: vtranslate("Please enter a valid E-mail address."),
+                numbers: vtranslate("Please enter integer value."),
+                date: vtranslate("Please enter a valid date."),
+                int: vtranslate("Please enter a integer value."),
+            }
+        };
+    
+        this.rules['int'] =  /^[\-\+\ ]?\d+$/;
+    }
+      
+    _onSubmit() {
+        
+        // this.validate(this.state.PortalVtigerValidate);
+        // alert(JSON.stringify(this.state.PortalVtigerValidate))
+        this.validate(this.state.PortalVtigerValidate);
+        if(this.getErrorMessages()){
+            alert(this.getErrorMessages())
+        }else{
+
+            alert(JSON.stringify(this.state.ticket_title))
+        }
+    }
+
+    setStateME = (obj)=>{
+        this.setState(obj, () => {
+            this.validate(this.state.PortalVtigerValidate);
+        });
     }
     
 
@@ -19,28 +57,160 @@ class Add extends Component {
 
         await AsyncStorage.getItem('email').then((value) => {
             if(value){
-                this.setState({ 'email': value })
+                this.setStateME({ 'PortalVtigerEmail': value })
             }
         })
         await AsyncStorage.getItem('password').then((value) => {
             if(value){
-                this.setState({ 'password': value })
+                this.setStateME({ 'PortalVtigerPassword': value })
             }
         })
 
-        let email =this.state.email
-        let pass = this.state.password;
+        let email =this.state.PortalVtigerEmail
+        let pass = this.state.PortalVtigerPassword;
         if(email && pass ){
-            this.setState({ 'describeModule': await describeModule(email,pass,"HelpDesk") });
+            var describe_module = await describeModule(email,pass,"HelpDesk") ;
+            this.setStateME({ 'PortalVtigerDescribeModule': describe_module});
+            
+            if(describe_module['describe'] && describe_module['describe']['fields'] ){
+                var data = {};
+                var dataValidate = {};
+                {Object.entries(describe_module['describe']['fields']).map((fields ) => {
+                    let field = fields[1];
+                    if (field.name !== 'contact_id' && field.name !== 'parent_id' && field.name !== 'assigned_user_id' && field.name !== 'related_to' && field.editable ) {
+
+                        if (field.type.name == 'string' ||  field.type.name == 'phone' || field.type.name == 'skype' || field.type.name == 'url' || field.type.name === "text"
+                        || field.type.name == 'email' || field.type.name == 'integer' || field.type.name == 'double' || field.type.name == 'currency') {
+                            data[ field.name ] = field.default;
+                            this.setStateME({  [field.name]: field.default});
+                        }
+                        if (field.type.name == 'boolean') {
+                            if (field.default == "on") {
+                                data[ field.name ] = true;
+                                this.setStateME({  [field.name]: true});
+                            } else {
+                                data[ field.name ] = false;
+                                this.setStateME({  [field.name]: false});
+                            }
+                        }
+
+                        if (field.type.name == 'time') {
+                            var date = new Date();
+                            if (field.default !== '') {
+                                var defaultTime = field.default.split(':');
+                                date.setHours(defaultTime[ 0 ]);
+                                date.setMinutes(defaultTime[ 1 ]);
+                            } 
+                            data[ field.name ] = date;
+                            this.setStateME({  [field.name]: date});
+                        }
+
+                        if (field.type.name == 'date' ) {
+                            if (!isNaN(field.default)) {
+                                var date = new Date();
+                                data[ field.name ] = formatDate(date);
+                                this.setStateME({  [field.name]: date});
+                            } else {
+                                data[ field.name ] = formatDate(field.default);
+                                this.setStateME({  [field.name]: field.default});
+                            }
+                        }
+
+                        if (field.type.name == 'multipicklist') {
+                            var defaultValues = [];
+                            if (field.default !== null) {
+                                defaultValues = field.default.split(' |##| ');
+                            }
+                            var selectedValues = [];
+                            if (defaultValues.length !== 0) {
+                                defaultValues.map( (values, i) => {
+                                    var o = {};
+                                    o.label = defaultValues[ i ];
+                                    o.value = defaultValues[ i ];
+                                    selectedValues.push(o);
+                                });
+                            }
+                            data[ field.name ] = selectedValues;
+                            this.setStateME({  [field.name]: selectedValues});
+                        }
+
+                        if (field.type.name == 'picklist' ) {
+                            var continueLoop = true;
+                            var defaultValue = field.default;
+                            field.type.picklistValues.map( (pickList, i) => {
+                                if (continueLoop) {
+                                    if (defaultValue !== '' && pickList.value == defaultValue) {
+                                        field.value = field.type.picklistValues[ i ];
+                                        field.index = i;
+                                        continueLoop = false;
+                                    } else if (defaultValue === '') {
+                                        field.value = field.type.picklistValues[ i ];
+                                        field.defaultIndex = i;
+                                        continueLoop = false;
+                                    }
+                                }
+                            });
+                            if (field.index === undefined) {
+                                data[ field.name ] = field.type.picklistValues[ 0 ].value;
+                            } else {
+                                data[ field.name ] = field.type.picklistValues[ field.index ].value;
+                            }
+                            this.setStateME({  [field.name]: data[ field.name ]});
+                        }
+
+                        if (field.type.name == 'string' ||  field.type.name == 'phone' || field.type.name == 'skype' || field.type.name == 'url' || field.type.name === "text") {
+                            dataValidate[field.name] = {required: field.mandatory};
+                        }
+    
+                        if (field.type.name == 'integer' ) {
+                            dataValidate[field.name] = { required: field.mandatory , int :true};
+                        }
+    
+                        if ( field.type.name == 'double' || field.type.name == 'currency') {
+                            dataValidate[field.name] = { numbers: true , required: field.mandatory };
+                        }
+    
+                        if (field.type.name == 'boolean') {
+                            dataValidate[field.name] = {required: field.mandatory};
+                        }
+    
+                        if (field.type.name == 'email') {
+                            dataValidate[field.name] = {email: true,required: field.mandatory};
+                        }
+    
+                        if (field.type.name == 'time') {
+                            dataValidate[field.name] = {date: 'HH:MM:SS',required: field.mandatory};
+                        }
+    
+                        if (field.type.name == 'date' ) {
+                            dataValidate[field.name] = {date: 'YYYY-MM-DD',required: field.mandatory};
+                        }
+    
+                        if (field.type.name == 'multipicklist') {
+                            dataValidate[field.name] = {required: field.mandatory};
+                        }
+    
+                        if (field.type.name == 'picklist' ) {
+                            dataValidate[field.name] = {required: field.mandatory};
+                        }
+    
+
+                    }
+                })} 
+                this.setStateME({ 'PortalVtigerData': data});
+                this.setStateME({ 'PortalVtigerValidate': dataValidate});
+                this.validate(dataValidate);
+            }
         }
 
+
     }
-    describeModuleShow = () =>{
-        var describeModule = this.state.describeModule;
-        if(describeModule['describe'] && describeModule['describe']['fields']){
-            alert(JSON.stringify(describeModule['describe'] ))
-        }
-        return null;
+
+    setValueData = (field,value)=>{
+        var data = this.state.PortalVtigerData;
+        data[ field ] = value;
+        this.setStateME({  [field]: value});
+        this.setStateME({ 'PortalVtigerData': data});
     }
 
     close = () => {
@@ -48,28 +218,64 @@ class Add extends Component {
     }
 
     render() {
-        return (
-            <View style = {styles.Modal}>
-                <Text style = {styles.HeaderText}>
-                    {vtranslate('Add New Ticket')}
-                </Text>
-                
-                <Divider style = {styles.Divider} /> 
-                
-                <View style={styles.mainBody}>
+        var describeModule = this.state.PortalVtigerDescribeModule;
+        if(describeModule['describe'] && describeModule['describe']['fields']){
+            return (
+                <ScrollView style = {styles.Modal}>
+                    <Text style = {styles.HeaderText}>
+                        {vtranslate('Add New Ticket')}
+                    </Text>
                     
-                    {this.describeModuleShow()}
+                    <Divider style = {styles.Divider} /> 
+                    
+                    <View style={styles.mainBody}>
+                            
+                            <View>
+                                <View>
+                                    {Object.entries(describeModule['describe']['fields']).sort((a, b) => Number(a[0]) > Number(b[0]) ? 1 : -1).map((fields ) => {
+                                        let field = fields[1];
+                                        if (field.name !== 'contact_id' && field.name !== 'parent_id' && field.name !== 'assigned_user_id' && field.name !== 'related_to' && field.editable && field.type.name !== "text") {
+                                            return (
+                                                <View key={field.name}>
+                                                    {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
+                                                    <TextInput style = {styles.inputText} ref={field.name} onChangeText={(val) => this.setValueData(field.name,val)} value={this.state[ field.name ]} />
+                                                    {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
+                                                </View>
+                                            )
+                                        }
+                                    })} 
+                                </View>
+                                
+                                <View>
+                                    {Object.entries(describeModule['describe']['fields']).sort((a, b) => Number(a[0]) > Number(b[0]) ? 1 : -1).map((fields ) => {
+                                        let field = fields[1];
+                                        if (field.type.name === "text" && field.editable) {
+                                            return (
+                                                <View key={field.name}>
+                                                    {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
+                                                    <TextInput multiline={true} style = {styles.inputTextArea} ref={field.name} onChangeText={(val) => this.setValueData(field.name,val)} value={this.state[ field.name ]} />
+                                                    {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
+                                                </View>
+                                            )
+                                        }
+                                    })} 
+                                </View>
+                            </View>
+                            {/* <Text>
+                                {this.getErrorMessages()}
+                            </Text> */}
+                    </View>
 
-                </View>
-
-                <Divider style = {styles.Divider} /> 
-                                 
-                <Button style = {styles.TextStatusSave} color={"#fff"} onPress={() => this.state.disableButton? {} : this.close()}>
-                    <Text style = {styles.submitButtonText}>{vtranslate("Save")}</Text>
-                </Button>
-                <Button style = {styles.submitButtonCancel} color={"#000"} onPress={() => this.close()}><Text style = {styles.submitButtonText}>{vtranslate("Cancel")}</Text></Button>
-            </View> 
-        )
+                    <Divider style = {styles.Divider} /> 
+                                    
+                    <Button style = {styles.TextStatusSave} color={"#fff"} onPress={() => this.state.PortalVtigerDisableButton? {} : this._onSubmit()}>
+                        <Text style = {styles.submitButtonText}>{vtranslate("Save")}</Text>
+                    </Button>
+                    <Button style = {styles.submitButtonCancel} color={"#000"} onPress={() => this.close()}><Text style = {styles.submitButtonText}>{vtranslate("Cancel")}</Text></Button>
+                </ScrollView> 
+            )
+        }
+        return null;
     }
 }
 
@@ -97,7 +303,8 @@ const styles = StyleSheet.create({
         padding : 5,
         margin : 5,
         borderWidth :1 ,
-        borderColor : '#adadad'
+        borderColor : '#adadad',
+        marginBottom : 25
     },
     TextStatusSave:{
         backgroundColor :'#5cb85c',
@@ -113,4 +320,25 @@ const styles = StyleSheet.create({
         padding: 25,
         color : '#000'
     },
+    stare : {
+        color : "#a94442"
+    },
+    inputText: {
+        textAlign :  'center',
+        margin: 20,
+        height: 40,
+        borderColor: color_bg,
+        borderWidth: 1,
+        padding : 10
+    },
+    inputTextArea:{
+        margin: 20,
+        borderColor: color_bg,
+        borderWidth: 1,
+        padding : 10
+    },
+    error:{
+        color : "#a94442",
+        paddingBottom : 10
+    }
 });
