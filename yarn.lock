@@ -5506,6 +5506,11 @@ react-native-codegen@^0.0.17:
     jscodeshift "^0.13.1"
     nullthrows "^1.1.1"
 
+react-native-date-picker@^4.2.2:
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/react-native-date-picker/-/react-native-date-picker-4.2.2.tgz#07fb8a9021fb48ef9a20b043d33c14e858220883"
+  integrity sha512-x0jxWbJXKDXivRDwsUx58tKOxe719XoVqqq6UzMSYSsTiPL2i13r7PyDxop3f3et/62qbcMgeswl+/CLdX6+Eg==
+
 react-native-form-validator@^0.5.1:
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/react-native-form-validator/-/react-native-form-validator-0.5.1.tgz#a2a438f24f593c5b9df0757f467819dd2c1ea330"
@@ -5523,6 +5528,13 @@ react-native-iphone-x-helper@^1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/react-native-iphone-x-helper/-/react-native-iphone-x-helper-1.3.1.tgz#20c603e9a0e765fd6f97396638bdeb0e5a60b010"
   integrity sha512-HOf0jzRnq2/aFUcdCJ9w9JGzN3gdEg0zFE4FyYlp4jtidqU03D5X7ZegGKfT1EWteR0gPBGp9ye5T5FvSWi9Yg==
+
+react-native-multiple-select@^0.5.9:
+  version "0.5.9"
+  resolved "https://registry.yarnpkg.com/react-native-multiple-select/-/react-native-multiple-select-0.5.9.tgz#03790a3e701e3d4cb91e4b3a5020c71e6b84db40"
+  integrity sha512-jk5pZpkQcVvvUYqT1Ept1W9gpf5Hb7REzTXOehDh5l0Z3z6N9G1/NsxpbaY+sMGvSx14SFGWM43RJVxI4k7rXQ==
+  dependencies:
+    prop-types "^15.7.2"
 
 react-native-navigation@^7.28.0:
   version "7.28.0"
