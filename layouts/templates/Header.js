@@ -116,7 +116,9 @@ class Header extends Component {
       
       AsyncStorage.setItem('module', module);
       
-      this.setState({ visible: false })
+      this.setState({ visible: false });
+      
+      AsyncStorage.setItem('record_id', 'false');
    }
 
    
@@ -137,7 +139,7 @@ class Header extends Component {
              AsyncStorage.setItem('module', 'Home');
              this.setState({ 'module': 'Home' })
          }
-     })
+     });
 
    }
 

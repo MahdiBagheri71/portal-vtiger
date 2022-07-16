@@ -7,7 +7,7 @@ class Footer extends Component {
         return (
             <View style = {styles.Footer}>
                 <Text style = {styles.FooterText} onPress={() => Linking.openURL('https://mahdibagherivar.ir/')}>
-                Created by Mehdi
+                Created by Mahdi Bagheri
                 </Text>
             </View> 
         )

@@ -133,7 +133,7 @@ class Add extends Component {
                 <Divider style = {styles.Divider} /> 
                                  
                 <Button style = {styles.TextStatusSave} color={"#fff"} onPress={() => this.state.disableButton? {} : this.uploadFile()}>
-                    <Text style = {styles.submitButtonText}>{vtranslate("Save")}</Text>
+                    <Text style = {styles.submitButtonText}>{ this.state.disableButton ? vtranslate("Loading"): vtranslate("Save")}</Text>
                 </Button>
                 <Button style = {styles.submitButtonCancel} color={"#000"} onPress={() => this.close()}><Text style = {styles.submitButtonText}>{vtranslate("Cancel")}</Text></Button>
             </View> 

@@ -45,11 +45,12 @@ class Add extends ValidationComponent {
       
     _onSubmit = async() => {
         
-        // this.validate(this.state.PortalVtigerValidate);
-        // alert(JSON.stringify(this.state.PortalVtigerValidate))
+        this.setStateME({ 'PortalVtigerDisableButton': true });
         this.validate(this.state.PortalVtigerValidate);
         if(this.getErrorMessages()){
-            alert(this.getErrorMessages())
+            alert(this.getErrorMessages());
+            this.setStateME({ 'PortalVtigerDisableButton': false });
+            return ;
         }else{
             let email =this.state.PortalVtigerEmail
             let pass = this.state.PortalVtigerPassword;
@@ -60,6 +61,7 @@ class Add extends ValidationComponent {
             }
             AsyncStorage.setItem('module', "HelpDesk");
             this.props.investmentHandler();
+            this.setStateME({ 'PortalVtigerDisableButton': false });
             return result;
         }
     }
@@ -446,7 +448,7 @@ class Add extends ValidationComponent {
                     <Divider style = {styles.Divider} /> 
                                     
                     <Button style = {styles.TextStatusSave} color={"#fff"} onPress={() => this.state.PortalVtigerDisableButton? {} : this._onSubmit()}>
-                        <Text style = {styles.submitButtonText}>{vtranslate("Save")}</Text>
+                        <Text style = {styles.submitButtonText}>{ this.state.PortalVtigerDisableButton ? vtranslate("Loading"): vtranslate("Save")}</Text>
                     </Button>
                     <Button style = {styles.submitButtonCancel} color={"#000"} onPress={() => this.close()}><Text style = {styles.submitButtonText}>{vtranslate("Cancel")}</Text></Button>
                 </ScrollView> 
