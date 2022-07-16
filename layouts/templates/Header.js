@@ -6,6 +6,7 @@ import {vtranslate,updateLang,fetchModules} from '../../Functions/Portal' ;
 
 
 import Home from './Portal/Home.js'
+import HelpDesk from './HelpDesk/Index'
 import Login from './Portal/Login.js'
 import Footer from './Footer.js'
 
@@ -180,7 +181,7 @@ class Header extends Component {
       
       switch(module) {
          case 'HelpDesk':
-           return <Text> HelpDesk</Text>;
+           return <HelpDesk investmentHandler={this.loadModule}/>;
          case 'Documents':
              return <Text> Documents</Text>;
          default:

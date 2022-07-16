@@ -330,6 +330,40 @@ export const  fetchReferenceRecords = async (user_name,password,module,query) =>
 
 }
 
+export const  fetchRecords = async (user_name,password,module, label, q, filter , pageNo, pageLimit, orderBy, order ) => {
+
+    var details = {
+        '_operation' : 'FetchRecords',
+		'module' : module,
+		'moduleLabel' : label,
+		'page' : pageNo,
+		'pageLimit' : pageLimit,
+		'fields' : filter,
+		'orderBy' : orderBy,
+		'order' :order,
+		'username' : user_name,
+		'password': password
+    };
+
+    details = {...details, ...q};
+
+    var text = user_name+":"+password;
+    var encoded_base64 = base64.encode(text);
+
+    var result = await api(details,encoded_base64);
+
+    if (result.hasOwnProperty('error') && result['error'].hasOwnProperty('message') ){
+        alert(vtranslate(result['error']['message']));
+        return false;
+    }else if (result.hasOwnProperty('success') && result.hasOwnProperty('result') && result['success']==true  ) {
+        return result['result'];
+    } else {
+        alert(JSON.stringify(result));
+        return false;
+    }
+
+}
+
 export const  saveRecord = async (user_name,password,module,values,recordId) => {
 
     var details = {

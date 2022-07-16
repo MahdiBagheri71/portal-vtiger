@@ -1,4 +1,3 @@
-
 import React, {Component} from 'react'
 import Header from './layouts/templates/Header.js'
 import {AppRegistry, View} from 'react-native'
