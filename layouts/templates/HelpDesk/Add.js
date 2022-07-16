@@ -1,11 +1,12 @@
 import React from 'react';
 import {View, Text, StyleSheet, TextInput, ScrollView, Switch  } from 'react-native'
 import { Button, Divider } from 'react-native-paper';
-import {vtranslate,describeModule,formatDate} from '../../../Functions/Portal' ;
+import {vtranslate,describeModule,formatDate,formatTime,fetchReferenceRecords,saveRecord} from '../../../Functions/Portal' ;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ValidationComponent from 'react-native-form-validator';
-import { Picker } from '@react-native-picker/picker';
-import MultiSelect from 'react-native-multiple-select';
+import { MultiSelect,Dropdown  } from 'react-native-element-dropdown';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import '../../../global.js' 
 
@@ -17,7 +18,9 @@ class Add extends ValidationComponent {
         PortalVtigerDisableButton : false,
         PortalVtigerDescribeModule : {},
         PortalVtigerData : {},
-        PortalVtigerValidate : {}
+        PortalVtigerValidate : {},
+        PortalVtigerDateTimeShow : {},
+        PortalVtigerRefersTo : {}
     }
 
     constructor(props) {
@@ -40,7 +43,7 @@ class Add extends ValidationComponent {
         this.rules['url'] =  /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&=]*)/;
     }
       
-    _onSubmit() {
+    _onSubmit = async() => {
         
         // this.validate(this.state.PortalVtigerValidate);
         // alert(JSON.stringify(this.state.PortalVtigerValidate))
@@ -48,8 +51,16 @@ class Add extends ValidationComponent {
         if(this.getErrorMessages()){
             alert(this.getErrorMessages())
         }else{
-
-            alert(JSON.stringify(this.state.PortalVtigerData))
+            let email =this.state.PortalVtigerEmail
+            let pass = this.state.PortalVtigerPassword;
+            var data =JSON.stringify(this.state.PortalVtigerData);
+            var result = await saveRecord(email,pass,'HelpDesk',data,false);
+            if(result["record"] && result["record"]['id']){
+                AsyncStorage.setItem('record_id', result["record"]['id']);
+            }
+            AsyncStorage.setItem('module', "HelpDesk");
+            this.props.investmentHandler();
+            return result;
         }
     }
 
@@ -82,7 +93,10 @@ class Add extends ValidationComponent {
             if(describe_module['describe'] && describe_module['describe']['fields'] ){
                 var data = {};
                 var dataValidate = {};
-                {Object.entries(describe_module['describe']['fields']).map((fields ) => {
+                var dateField = {};
+                var refersTo = {};
+                
+                {Object.entries(describe_module['describe']['fields']).map(async (fields ) => {
                     let field = fields[1];
                     if (field.name !== 'contact_id' && field.name !== 'parent_id' && field.name !== 'assigned_user_id' && field.name !== 'related_to' && field.editable ) {
 
@@ -90,8 +104,7 @@ class Add extends ValidationComponent {
                         || field.type.name == 'email' || field.type.name == 'integer' || field.type.name == 'double' || field.type.name == 'currency') {
                             data[ field.name ] = field.default;
                             this.setStateME({  [field.name]: field.default});
-                        }
-                        if (field.type.name == 'boolean') {
+                        }else if (field.type.name == 'boolean') {
                             if (field.default == "on") {
                                 data[ field.name ] = true;
                                 this.setStateME({  [field.name]: true});
@@ -99,20 +112,17 @@ class Add extends ValidationComponent {
                                 data[ field.name ] = false;
                                 this.setStateME({  [field.name]: false});
                             }
-                        }
-
-                        if (field.type.name == 'time') {
+                        }else if (field.type.name == 'time') {
                             var date = new Date();
                             if (field.default !== '') {
                                 var defaultTime = field.default.split(':');
                                 date.setHours(defaultTime[ 0 ]);
                                 date.setMinutes(defaultTime[ 1 ]);
                             } 
-                            data[ field.name ] = date;
+                            data[ field.name ] = formatTime(date);
+                            dateField [field.name] = false;
                             this.setStateME({  [field.name]: date});
-                        }
-
-                        if (field.type.name == 'date' ) {
+                        }else if (field.type.name == 'date' ) {
                             if (!isNaN(field.default)) {
                                 var date = new Date();
                                 data[ field.name ] = formatDate(date);
@@ -121,9 +131,8 @@ class Add extends ValidationComponent {
                                 data[ field.name ] = formatDate(field.default);
                                 this.setStateME({  [field.name]: field.default});
                             }
-                        }
-
-                        if (field.type.name == 'multipicklist') {
+                            dateField [field.name] = false;
+                        }else if (field.type.name == 'multipicklist') {
                             var defaultValues = [];
                             if (field.default !== null) {
                                 defaultValues = field.default.split(' |##| ');
@@ -137,9 +146,7 @@ class Add extends ValidationComponent {
                             data[ field.name ] = selectedValues.join(' |##| ');
                             this.setStateME({  [field.name]: selectedValues});
 
-                        }
-
-                        if (field.type.name == 'picklist' ) {
+                        }else if (field.type.name == 'picklist' ) {
                             var continueLoop = true;
                             var defaultValue = field.default;
                             field.type.picklistValues.map( (pickList, i) => {
@@ -161,49 +168,44 @@ class Add extends ValidationComponent {
                                 data[ field.name ] = field.type.picklistValues[ field.index ].value;
                             }
                             this.setStateME({  [field.name]: data[ field.name ]});
+                        }else if (field.type.name == 'reference') {
+
+                            if(field.type.refersTo && field.type.refersTo[0]){
+                                let module_name = field.type.refersTo[0];
+                                refersTo[ field.name ] = await fetchReferenceRecords(email,pass,module_name,"") ;
+                            }
+                            
+                            data[ field.name ] = field.default;
+                            this.setStateME({  [field.name]: field.default});
+
+                        }else {
+                            data[ field.name ] = field.default;
+                            this.setStateME({  [field.name]: field.default});
                         }
 
                         if (field.type.name == 'string' ||  field.type.name == 'phone' || field.type.name == 'skype' || field.type.name === "text") {
                             dataValidate[field.name] = {required: field.mandatory};
-                        }
-    
-                        if (field.type.name == 'url' ) {
+                        }else if (field.type.name == 'url' ) {
                             dataValidate[field.name] = { required: field.mandatory , url :true};
-                        }
-    
-                        if (field.type.name == 'integer' ) {
+                        }else if (field.type.name == 'integer' ) {
                             dataValidate[field.name] = { required: field.mandatory , int :true};
-                        }
-    
-                        if ( field.type.name == 'double') {
+                        }else if ( field.type.name == 'double') {
                             dataValidate[field.name] = { numbers: true , required: field.mandatory};
-                        }
-    
-                        if ( field.type.name == 'currency') {
+                        }else if ( field.type.name == 'currency') {
                             dataValidate[field.name] = {  required: field.mandatory ,currency:true};
-                        }
-    
-                        if (field.type.name == 'boolean') {
+                        }else if (field.type.name == 'boolean') {
                             dataValidate[field.name] = {required: field.mandatory};
-                        }
-    
-                        if (field.type.name == 'email') {
+                        }else if (field.type.name == 'email') {
                             dataValidate[field.name] = {email: true,required: field.mandatory};
-                        }
-    
-                        if (field.type.name == 'time') {
+                        }else if (field.type.name == 'time') {
                             dataValidate[field.name] = {date: 'HH:MM:SS',required: field.mandatory};
-                        }
-    
-                        if (field.type.name == 'date' ) {
+                        }else if (field.type.name == 'date' ) {
                             dataValidate[field.name] = {date: 'YYYY-MM-DD',required: field.mandatory};
-                        }
-    
-                        if (field.type.name == 'multipicklist') {
+                        }else if (field.type.name == 'multipicklist') {
                             dataValidate[field.name] = {required: field.mandatory};
-                        }
-    
-                        if (field.type.name == 'picklist' ) {
+                        }else if (field.type.name == 'picklist' ) {
+                            dataValidate[field.name] = {required: field.mandatory};
+                        }else{
                             dataValidate[field.name] = {required: field.mandatory};
                         }
     
@@ -212,6 +214,9 @@ class Add extends ValidationComponent {
                 })} 
                 this.setStateME({ 'PortalVtigerData': data});
                 this.setStateME({ 'PortalVtigerValidate': dataValidate});
+                this.setStateME({ 'PortalVtigerDateTimeShow': dateField});
+                this.setStateME({ 'PortalVtigerRefersTo': refersTo});
+                
                 this.validate(dataValidate);
             }
         }
@@ -222,7 +227,11 @@ class Add extends ValidationComponent {
     setValueData = (field,value,type)=>{
         var data = this.state.PortalVtigerData;
         if(type == 'multipicklist'){
-            data[ field ] = value.join(" |##| ");
+            data[ field ] = value.join(' |##| ');
+        }else if(type == 'date'){
+            data[ field ] = formatDate(value);
+        }else if(type == 'time'){
+            data[ field ] = formatTime(value);
         }else{
             data[ field ] = value;
         }
@@ -234,11 +243,18 @@ class Add extends ValidationComponent {
         this.props.investmentHandler();
     }
 
+    showDateTimeField = (field) =>{
+        var data = this.state.PortalVtigerDateTimeShow;
+        data[ field ] = true;
+        this.setStateME({ 'PortalVtigerDateTimeShow': data});
+
+    }
+
     render() {
         var describeModule = this.state.PortalVtigerDescribeModule;
         if(describeModule['describe'] && describeModule['describe']['fields']){
             return (
-                <ScrollView style = {styles.Modal}>
+                <ScrollView style = {styles.Modal} nestedScrollEnabled={true}>
                     <Text style = {styles.HeaderText}>
                         {vtranslate('Add New Ticket')}
                     </Text>
@@ -256,11 +272,27 @@ class Add extends ValidationComponent {
                                                 return (
                                                     <View key={field.name}>
                                                         {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
-                                                        <Picker selectedValue = {this.state[ field.name ]} onValueChange = {(val) => this.setValueData(field.name,val,'picklist')}>
-                                                            {(field.type.picklistValues).map((picklistValue ) => {
-                                                                return (<Picker.Item key={picklistValue.label} label = {picklistValue.label} value = {picklistValue.value} />);
-                                                            })}
-                                                        </Picker>
+                                                        <Dropdown
+                                                            style={styles.dropdown}
+                                                            placeholderStyle={styles.placeholderStyle}
+                                                            selectedTextStyle={styles.selectedTextStyle}
+                                                            inputSearchStyle={styles.inputSearchStyle}
+                                                            iconStyle={styles.iconStyle}
+                                                            data={field.type.picklistValues}
+                                                            search
+                                                            maxHeight={300}
+                                                            labelField="label"
+                                                            valueField="value"
+                                                            placeholder={vtranslate("Select item")}
+                                                            searchPlaceholder={vtranslate("Search...")}
+                                                            value={this.state[ field.name ]}
+                                                            onChange={item => {
+                                                                this.setValueData(field.name,item.value,'picklist');
+                                                            }}
+                                                            renderLeftIcon={() => (
+                                                                <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
+                                                            )}
+                                                            />
                                                         {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
                                                     </View>
                                                 )
@@ -268,29 +300,30 @@ class Add extends ValidationComponent {
                                                 return (
                                                     <View key={field.name}>
                                                         {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
-                                                        <View style = {{alignItems: "center",justifyContent: "center"}}>
-                                                            <ScrollView horizontal={true} >
-                                                                <MultiSelect
-                                                                    items={field.type.picklistValues}
-                                                                    uniqueKey="value"
-                                                                    displayKey="label"
-                                                                    ref={(component) => { this.multiSelect = component }}
-                                                                    onSelectedItemsChange={(val) => this.setValueData(field.name,val,'multipicklist')}
-                                                                    selectedItems={this.state[ field.name ]}
-                                                                    selectText=""
-                                                                    searchInputPlaceholderText=""
-                                                                    tagRemoveIconColor="#CCC"
-                                                                    tagBorderColor="#CCC"
-                                                                    tagTextColor="#CCC"
-                                                                    selectedItemTextColor="#CCC"
-                                                                    selectedItemIconColor="#CCC"
-                                                                    itemTextColor="#000"
-                                                                    searchInputStyle={{ color: '#CCC' }}
-                                                                    submitButtonColor="#CCC"
-                                                                    submitButtonText={vtranslate("Submit")}
+                                                        <MultiSelect
+                                                            style={styles.dropdown}
+                                                            placeholderStyle={styles.placeholderStyle}
+                                                            selectedTextStyle={styles.selectedTextStyle}
+                                                            inputSearchStyle={styles.inputSearchStyle}
+                                                            iconStyle={styles.iconStyle}
+                                                            search
+                                                            data={field.type.picklistValues}
+                                                            labelField="label"
+                                                            valueField="value"
+                                                            placeholder={vtranslate("Select item")}
+                                                            searchPlaceholder={vtranslate("Search...")}
+                                                            value={this.state[ field.name ]}
+                                                            onChange={(val) => this.setValueData(field.name,val,'multipicklist')}
+                                                            renderLeftIcon={() => (
+                                                                <AntDesign
+                                                                style={styles.icon}
+                                                                color="black"
+                                                                name="Safety"
+                                                                size={20}
                                                                 />
-                                                            </ScrollView>
-                                                        </View>
+                                                            )}
+                                                            selectedStyle={styles.selectedStyle}
+                                                                    />
                                                         {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
                                                     </View>
                                                 )
@@ -314,9 +347,66 @@ class Add extends ValidationComponent {
                                                 return (
                                                     <View key={field.name}>
                                                         {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
-                                                        <View style = {{alignItems: "center",justifyContent: "center"}}>
-                                                        {/* <DatePicker date={this.state[ field.name ]} onDateChange={(val) => this.setValueData(field.name,val,'date')} /> */}
-                                                        </View>
+                                                        <Button  style = {styles.submitButtonCancel} onPress={()=>this.showDateTimeField(field.name)}>
+                                                            <Text style = {styles.submitButtonText}>{this.state.PortalVtigerData[ field.name ]}</Text>
+                                                        </Button>
+                                                        {this.state.PortalVtigerDateTimeShow[field.name] && (
+                                                            <DateTimePicker
+                                                                value={this.state[ field.name ]}
+                                                                mode='date'
+                                                                is24Hour={true}
+                                                                display="default"
+                                                                onChange={(event, selectedDate)=>{this.state.PortalVtigerDateTimeShow[field.name] = false ;this.setValueData(field.name,selectedDate,'date')}}
+                                                                />
+                                                        )}
+                                                        {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
+                                                    </View>
+                                                )
+                                            }else if (field.type.name == 'time' ) {
+                                                return (
+                                                    <View key={field.name}>
+                                                        {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
+                                                        
+                                                        <Button  style = {styles.submitButtonCancel} onPress={()=>this.showDateTimeField(field.name)}>
+                                                            <Text style = {styles.submitButtonText}>{this.state.PortalVtigerData[ field.name ]}</Text>
+                                                        </Button>
+                                                        {this.state.PortalVtigerDateTimeShow[field.name] && (
+                                                            <DateTimePicker
+                                                                value={this.state[ field.name ]}
+                                                                mode='time'
+                                                                is24Hour={true}
+                                                                display="default"
+                                                                onChange={(event, selectedDate)=>{this.state.PortalVtigerDateTimeShow[field.name] = false ;this.setValueData(field.name,selectedDate,'time')}}
+                                                                />
+                                                        )}
+                                                        {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
+                                                    </View>
+                                                )
+                                            }else if (field.type.name == 'reference' ) {
+                                                return (
+                                                    <View key={field.name}>
+                                                        {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
+                                                        {this.state.PortalVtigerRefersTo[field.name] ?<Dropdown
+                                                            style={styles.dropdown}
+                                                            placeholderStyle={styles.placeholderStyle}
+                                                            selectedTextStyle={styles.selectedTextStyle}
+                                                            inputSearchStyle={styles.inputSearchStyle}
+                                                            iconStyle={styles.iconStyle}
+                                                            data={this.state.PortalVtigerRefersTo[field.name]}
+                                                            search
+                                                            maxHeight={300}
+                                                            labelField="label"
+                                                            valueField="id"
+                                                            placeholder={vtranslate("Select item")}
+                                                            searchPlaceholder={vtranslate("Search...")}
+                                                            value={this.state[ field.name ]}
+                                                            onChange={item => {
+                                                                this.setValueData(field.name,item.id,'reference');
+                                                            }}
+                                                            renderLeftIcon={() => (
+                                                                <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
+                                                            )}
+                                                            />:null}
                                                         {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
                                                     </View>
                                                 )
@@ -427,5 +517,35 @@ const styles = StyleSheet.create({
     error:{
         color : "#a94442",
         paddingBottom : 10
+    },
+    dropdown: {
+        height: 50,
+        backgroundColor: 'transparent',
+        borderBottomColor: 'gray',
+        borderBottomWidth: 0.5,
+        margin : 15
+    },
+    placeholderStyle: {
+        fontSize: 16,
+    },
+    selectedTextStyle: {
+        fontSize: 14,
+    },
+    iconStyle: {
+        width: 20,
+        height: 20,
+    },
+    inputSearchStyle: {
+        height: 40,
+        fontSize: 16,
+    },
+    icon: {
+        marginRight: 5,
+    },
+    selectedStyle: {
+        borderRadius: 12,
+    },
+    submitButtonText : {
+        color : "#000"
     }
 });

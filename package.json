@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.17.7",
-    "@react-native-picker/picker": "^2.4.2",
+    "@react-native-community/datetimepicker": "^6.2.0",
     "axios": "^0.27.2",
     "expo": "~45.0.0",
     "expo-document-picker": "~10.2.1",
@@ -20,10 +20,12 @@
     "react-dom": "17.0.2",
     "react-native": "0.68.2",
     "react-native-base64": "^0.2.1",
+    "react-native-dropdown-listpicker": "^1.1.4",
+    "react-native-element-dropdown": "^2.0.0",
     "react-native-form-validator": "^0.5.1",
-    "react-native-multiple-select": "^0.5.9",
     "react-native-navigation": "^7.28.0",
     "react-native-paper": "^4.12.2",
+    "react-native-ui-xg": "^0.0.6",
     "react-native-vector-icons": "^9.2.0",
     "react-native-web": "0.17.7"
   },

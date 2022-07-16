@@ -1,10 +1,26 @@
 import React, { Component } from 'react'
 import {View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Picker } from '@react-native-picker/picker';
 import {  Divider } from 'react-native-paper';
 import '../../../global.js' 
-import {vtranslate,updateLang,ping,fetchModules} from '../../../Functions/Portal' 
+import {vtranslate,updateLang,ping,fetchModules} from '../../../Functions/Portal';
+import { Dropdown } from 'react-native-element-dropdown';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+
+
+const data_lang = [
+   { label: vtranslate('US English'), value: 'en_us' },
+   { label: vtranslate('فارسی'), value: 'fa_ir' },
+   { label: vtranslate('DE Deutsch'), value: 'de_de' },
+   { label: vtranslate('PT Brasil'), value: 'pt_br' },
+   { label: vtranslate('Francais'), value: 'fr_fr' },
+   { label: vtranslate('Turkce Dil Paketi'), value: 'tr_tr' },
+   { label: vtranslate('ES Spanish'), value: 'es_es' },
+   { label: vtranslate('NL-Dutch'), value: 'nl_nl' },
+   { label: vtranslate('简体中文'), value: 'zh_cn' },
+   { label: vtranslate('繁體中文'), value: 'zh_tw' }
+ ];
+
 class Login extends Component {
    state = {
    }
@@ -78,6 +94,22 @@ class Login extends Component {
       this.setState({ lang: lang })
    }
 
+   renderItem = (item) => {
+      return (
+        <View style={styles.item}>
+          <Text style={styles.textItem}>{item.label}</Text>
+          {item.value === this.state.lang && (
+            <AntDesign
+              style={styles.icon}
+              color="black"
+              name="Safety"
+              size={20}
+            />
+          )}
+        </View>
+      );
+    };
+
    render() {
       return (
          <View style = {styles.containerLogin}>
@@ -100,18 +132,28 @@ class Login extends Component {
             
             <View  style = {styles.langViewLogin}>
                <Text style = {styles.langTextLogin}>{vtranslate('Language')}</Text>
-               <Picker selectedValue = {this.state.lang} onValueChange = {this.updateLanguage}>
-                  <Picker.Item label = {vtranslate('US English')} value = "en_us" />
-                  <Picker.Item label = {vtranslate('فارسی')} value = "fa_ir" />
-                  <Picker.Item label = {vtranslate('DE Deutsch')} value = "de_de" />
-                  <Picker.Item label = {vtranslate('PT Brasil')} value = "pt_br" />
-                  <Picker.Item label = {vtranslate('Francais')} value = "fr_fr" />
-                  <Picker.Item label = {vtranslate('Turkce Dil Paketi')} value = "tr_tr" />
-                  <Picker.Item label = {vtranslate('ES Spanish')} value = "es_es" />
-                  <Picker.Item label = {vtranslate('NL-Dutch')} value = "nl_nl" />
-                  <Picker.Item label = {vtranslate('简体中文')} value = "zh_cn" />
-                  <Picker.Item label = {vtranslate('繁體中文')} value = "zh_tw" />
-               </Picker>
+               <Dropdown
+                  style={styles.dropdown}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  iconStyle={styles.iconStyle}
+                  data={data_lang}
+                  search
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={vtranslate("Select item")}
+                  searchPlaceholder={vtranslate("Search...")}
+                  value={this.state.lang}
+                  onChange={item => {
+                     this.updateLanguage(item.value);
+                  }}
+                  renderLeftIcon={() => (
+                     <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
+                  )}
+                  renderItem={this.renderItem}
+                  />
             </View>
             
             <TouchableOpacity
@@ -162,5 +204,48 @@ const styles = StyleSheet.create({
    submitButtonTextLogin:{
       color: 'white',
       textAlign: 'center'
-   }
+   },
+   dropdown: {
+      margin: 16,
+      height: 50,
+      backgroundColor: 'white',
+      borderRadius: 12,
+      padding: 12,
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 0.2,
+      shadowRadius: 1.41,
+
+      elevation: 2,
+   },
+   icon: {
+      marginRight: 5,
+   },
+   item: {
+      padding: 17,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+   },
+   textItem: {
+      flex: 1,
+      fontSize: 16,
+   },
+   placeholderStyle: {
+      fontSize: 16,
+   },
+   selectedTextStyle: {
+      fontSize: 16,
+   },
+   iconStyle: {
+      width: 20,
+      height: 20,
+   },
+   inputSearchStyle: {
+      height: 40,
+      fontSize: 16,
+   },
 })

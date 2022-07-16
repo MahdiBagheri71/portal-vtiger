@@ -111,6 +111,15 @@ export const formatDate = (date) => {
     return [year, month, day].join('-');
 }
 
+export const formatTime = (date) => {
+    var d = new Date(date),
+        hours = '' + (d.getHours()),
+        minutes = '' + d.getMinutes();
+        // seconds = d.getSeconds();
+
+    return [hours, minutes].join(':');
+}
+
 export const  ping = async (user_name,password) => {
 
     var details = {
@@ -275,6 +284,65 @@ export const  describeModule = async (user_name,password,module) => {
         'username' : user_name,
         'password' : password
     };
+
+    var text = user_name+":"+password;
+    var encoded_base64 = base64.encode(text);
+
+    var result = await api(details,encoded_base64);
+
+    if (result.hasOwnProperty('error') && result['error'].hasOwnProperty('message') ){
+        alert(vtranslate(result['error']['message']));
+        return false;
+    }else if (result.hasOwnProperty('success') && result.hasOwnProperty('result') && result['success']==true  ) {
+        return result['result'];
+    } else {
+        alert(JSON.stringify(result));
+        return false;
+    }
+
+}
+
+export const  fetchReferenceRecords = async (user_name,password,module,query) => {
+
+    var details = {
+        '_operation': 'FetchReferenceRecords',
+        'module' : module,
+        'language' : language_select,
+        'searchKey' : query,
+        'username' : user_name,
+        'password' : password
+    };
+
+    var text = user_name+":"+password;
+    var encoded_base64 = base64.encode(text);
+
+    var result = await api(details,encoded_base64);
+
+    if (result.hasOwnProperty('error') && result['error'].hasOwnProperty('message') ){
+        alert(vtranslate(result['error']['message']));
+        return false;
+    }else if (result.hasOwnProperty('success') && result.hasOwnProperty('result') && result['success']==true  ) {
+        return result['result'];
+    } else {
+        alert(JSON.stringify(result));
+        return false;
+    }
+
+}
+
+export const  saveRecord = async (user_name,password,module,values,recordId) => {
+
+    var details = {
+        '_operation': 'SaveRecord',
+        'module' : module,
+        'values' : values,
+        'username' : user_name,
+        'password' : password
+    };
+
+    if(recordId){
+        details['recordId']=recordId;
+    }
 
     var text = user_name+":"+password;
     var encoded_base64 = base64.encode(text);
