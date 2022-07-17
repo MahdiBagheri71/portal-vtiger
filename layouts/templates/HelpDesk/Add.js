@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet, TextInput, ScrollView, Switch  } from 'react-native'
-import { Button, Divider } from 'react-native-paper';
+import { Button, Divider,ActivityIndicator } from 'react-native-paper';
 import {vtranslate,describeModule,formatDate,formatTime,fetchReferenceRecords,saveRecord} from '../../../Functions/Portal' ;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ValidationComponent from 'react-native-form-validator';
@@ -254,207 +254,206 @@ class Add extends ValidationComponent {
 
     render() {
         var describeModule = this.state.PortalVtigerDescribeModule;
-        if(describeModule['describe'] && describeModule['describe']['fields']){
-            return (
-                <ScrollView style = {styles.Modal} nestedScrollEnabled={true}>
-                    <Text style = {styles.HeaderText}>
-                        {vtranslate('Add New Ticket')}
-                    </Text>
-                    
-                    <Divider style = {styles.Divider} /> 
-                    
-                    <View style={styles.mainBody}>
-                            
-                            <View>
-                                <View>
-                                    {Object.entries(describeModule['describe']['fields']).sort((a, b) => Number(a[0]) > Number(b[0]) ? 1 : -1).map((fields ) => {
-                                        let field = fields[1];
-                                        if (field.name !== 'contact_id' && field.name !== 'parent_id' && field.name !== 'assigned_user_id' && field.name !== 'related_to' && field.editable && field.type.name !== "text") {
-                                            if (field.type.name == 'picklist' ) {
-                                                return (
-                                                    <View key={field.name}>
-                                                        {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
-                                                        <Dropdown
-                                                            style={styles.dropdown}
-                                                            placeholderStyle={styles.placeholderStyle}
-                                                            selectedTextStyle={styles.selectedTextStyle}
-                                                            inputSearchStyle={styles.inputSearchStyle}
-                                                            iconStyle={styles.iconStyle}
-                                                            data={field.type.picklistValues}
-                                                            search
-                                                            maxHeight={300}
-                                                            labelField="label"
-                                                            valueField="value"
-                                                            placeholder={vtranslate("Select item")}
-                                                            searchPlaceholder={vtranslate("Search...")}
-                                                            value={this.state[ field.name ]}
-                                                            onChange={item => {
-                                                                this.setValueData(field.name,item.value,'picklist');
-                                                            }}
-                                                            renderLeftIcon={() => (
-                                                                <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
-                                                            )}
-                                                            />
-                                                        {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
-                                                    </View>
-                                                )
-                                            }else if (field.type.name == 'multipicklist' ) {
-                                                return (
-                                                    <View key={field.name}>
-                                                        {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
-                                                        <MultiSelect
-                                                            style={styles.dropdown}
-                                                            placeholderStyle={styles.placeholderStyle}
-                                                            selectedTextStyle={styles.selectedTextStyle}
-                                                            inputSearchStyle={styles.inputSearchStyle}
-                                                            iconStyle={styles.iconStyle}
-                                                            search
-                                                            data={field.type.picklistValues}
-                                                            labelField="label"
-                                                            valueField="value"
-                                                            placeholder={vtranslate("Select item")}
-                                                            searchPlaceholder={vtranslate("Search...")}
-                                                            value={this.state[ field.name ]}
-                                                            onChange={(val) => this.setValueData(field.name,val,'multipicklist')}
-                                                            renderLeftIcon={() => (
-                                                                <AntDesign
-                                                                style={styles.icon}
-                                                                color="black"
-                                                                name="Safety"
-                                                                size={20}
-                                                                />
-                                                            )}
-                                                            selectedStyle={styles.selectedStyle}
-                                                                    />
-                                                        {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
-                                                    </View>
-                                                )
-                                            }else if (field.type.name == 'boolean' ) {
-                                                return (
-                                                    <View key={field.name}>
-                                                        {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
-                                                        <View style = {{alignItems: "center",justifyContent: "center"}}>
-                                                            <Switch 
-                                                                trackColor={{ false: "#767577", true: "#81b0ff" }}
-                                                                thumbColor={this.state[ field.name ] ? "#f5dd4b" : "#f4f3f4"}
-                                                                ios_backgroundColor="#3e3e3e"
-                                                                onValueChange={(val) => this.setValueData(field.name,val,'boolean')}
-                                                                value={this.state[ field.name ]}
-                                                            />
-                                                        </View>
-                                                        {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
-                                                    </View>
-                                                )
-                                            }else if (field.type.name == 'date' ) {
-                                                return (
-                                                    <View key={field.name}>
-                                                        {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
-                                                        <Button  style = {styles.submitButtonCancel} onPress={()=>this.showDateTimeField(field.name)}>
-                                                            <Text style = {styles.submitButtonText}>{this.state.PortalVtigerData[ field.name ]}</Text>
-                                                        </Button>
-                                                        {this.state.PortalVtigerDateTimeShow[field.name] && (
-                                                            <DateTimePicker
-                                                                value={this.state[ field.name ]}
-                                                                mode='date'
-                                                                is24Hour={true}
-                                                                display="default"
-                                                                onChange={(event, selectedDate)=>{this.state.PortalVtigerDateTimeShow[field.name] = false ;this.setValueData(field.name,selectedDate,'date')}}
-                                                                />
-                                                        )}
-                                                        {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
-                                                    </View>
-                                                )
-                                            }else if (field.type.name == 'time' ) {
-                                                return (
-                                                    <View key={field.name}>
-                                                        {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
-                                                        
-                                                        <Button  style = {styles.submitButtonCancel} onPress={()=>this.showDateTimeField(field.name)}>
-                                                            <Text style = {styles.submitButtonText}>{this.state.PortalVtigerData[ field.name ]}</Text>
-                                                        </Button>
-                                                        {this.state.PortalVtigerDateTimeShow[field.name] && (
-                                                            <DateTimePicker
-                                                                value={this.state[ field.name ]}
-                                                                mode='time'
-                                                                is24Hour={true}
-                                                                display="default"
-                                                                onChange={(event, selectedDate)=>{this.state.PortalVtigerDateTimeShow[field.name] = false ;this.setValueData(field.name,selectedDate,'time')}}
-                                                                />
-                                                        )}
-                                                        {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
-                                                    </View>
-                                                )
-                                            }else if (field.type.name == 'reference' ) {
-                                                return (
-                                                    <View key={field.name}>
-                                                        {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
-                                                        {this.state.PortalVtigerRefersTo[field.name] ?<Dropdown
-                                                            style={styles.dropdown}
-                                                            placeholderStyle={styles.placeholderStyle}
-                                                            selectedTextStyle={styles.selectedTextStyle}
-                                                            inputSearchStyle={styles.inputSearchStyle}
-                                                            iconStyle={styles.iconStyle}
-                                                            data={this.state.PortalVtigerRefersTo[field.name]}
-                                                            search
-                                                            maxHeight={300}
-                                                            labelField="label"
-                                                            valueField="id"
-                                                            placeholder={vtranslate("Select item")}
-                                                            searchPlaceholder={vtranslate("Search...")}
-                                                            value={this.state[ field.name ]}
-                                                            onChange={item => {
-                                                                this.setValueData(field.name,item.id,'reference');
-                                                            }}
-                                                            renderLeftIcon={() => (
-                                                                <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
-                                                            )}
-                                                            />:null}
-                                                        {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
-                                                    </View>
-                                                )
-                                            }else{
-                                                return (
-                                                    <View key={field.name}>
-                                                        {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
-                                                        <TextInput style = {styles.inputText} ref={field.name} onChangeText={(val) => this.setValueData(field.name,val,'string')} value={this.state[ field.name ]} />
-                                                        {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
-                                                    </View>
-                                                )
-                                            }
-                                        }
-                                    })} 
-                                </View>
-                                
-                                <View>
-                                    {Object.entries(describeModule['describe']['fields']).sort((a, b) => Number(a[0]) > Number(b[0]) ? 1 : -1).map((fields ) => {
-                                        let field = fields[1];
-                                        if (field.type.name === "text" && field.editable) {
-                                            return (
-                                                <View key={field.name}>
-                                                    {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
-                                                    <TextInput multiline={true} style = {styles.inputTextArea} ref={field.name} onChangeText={(val) => this.setValueData(field.name,val,'string')} value={this.state[ field.name ]} />
-                                                    {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
-                                                </View>
-                                            )
-                                        }
-                                    })} 
-                                </View>
-                            </View>
-                            {/* <Text>
-                                {this.getErrorMessages()}
-                            </Text> */}
-                    </View>
-
-                    <Divider style = {styles.Divider} /> 
+        return (
+            <ScrollView style = {styles.Modal} nestedScrollEnabled={true}>
+                <Text style = {styles.HeaderText}>
+                    {vtranslate('Add New Ticket')}
+                </Text>
+                
+                <Divider style = {styles.Divider} /> 
+                {(describeModule['describe'] && describeModule['describe']['fields'])?
+                        <View style={styles.mainBody}>
                                     
+                                    <View>
+                                        <View>
+                                            {Object.entries(describeModule['describe']['fields']).sort((a, b) => Number(a[0]) > Number(b[0]) ? 1 : -1).map((fields ) => {
+                                                let field = fields[1];
+                                                if (field.name !== 'contact_id' && field.name !== 'parent_id' && field.name !== 'assigned_user_id' && field.name !== 'related_to' && field.editable && field.type.name !== "text") {
+                                                    if (field.type.name == 'picklist' ) {
+                                                        return (
+                                                            <View key={field.name}>
+                                                                {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
+                                                                <Dropdown
+                                                                    style={styles.dropdown}
+                                                                    placeholderStyle={styles.placeholderStyle}
+                                                                    selectedTextStyle={styles.selectedTextStyle}
+                                                                    inputSearchStyle={styles.inputSearchStyle}
+                                                                    iconStyle={styles.iconStyle}
+                                                                    data={field.type.picklistValues}
+                                                                    search
+                                                                    maxHeight={300}
+                                                                    labelField="label"
+                                                                    valueField="value"
+                                                                    placeholder={vtranslate("Select item")}
+                                                                    searchPlaceholder={vtranslate("Search...")}
+                                                                    value={this.state[ field.name ]}
+                                                                    onChange={item => {
+                                                                        this.setValueData(field.name,item.value,'picklist');
+                                                                    }}
+                                                                    renderLeftIcon={() => (
+                                                                        <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
+                                                                    )}
+                                                                    />
+                                                                {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
+                                                            </View>
+                                                        )
+                                                    }else if (field.type.name == 'multipicklist' ) {
+                                                        return (
+                                                            <View key={field.name}>
+                                                                {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
+                                                                <MultiSelect
+                                                                    style={styles.dropdown}
+                                                                    placeholderStyle={styles.placeholderStyle}
+                                                                    selectedTextStyle={styles.selectedTextStyle}
+                                                                    inputSearchStyle={styles.inputSearchStyle}
+                                                                    iconStyle={styles.iconStyle}
+                                                                    search
+                                                                    data={field.type.picklistValues}
+                                                                    labelField="label"
+                                                                    valueField="value"
+                                                                    placeholder={vtranslate("Select item")}
+                                                                    searchPlaceholder={vtranslate("Search...")}
+                                                                    value={this.state[ field.name ]}
+                                                                    onChange={(val) => this.setValueData(field.name,val,'multipicklist')}
+                                                                    renderLeftIcon={() => (
+                                                                        <AntDesign
+                                                                        style={styles.icon}
+                                                                        color="black"
+                                                                        name="Safety"
+                                                                        size={20}
+                                                                        />
+                                                                    )}
+                                                                    selectedStyle={styles.selectedStyle}
+                                                                            />
+                                                                {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
+                                                            </View>
+                                                        )
+                                                    }else if (field.type.name == 'boolean' ) {
+                                                        return (
+                                                            <View key={field.name}>
+                                                                {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
+                                                                <View style = {{alignItems: "center",justifyContent: "center"}}>
+                                                                    <Switch 
+                                                                        trackColor={{ false: "#767577", true: "#81b0ff" }}
+                                                                        thumbColor={this.state[ field.name ] ? "#f5dd4b" : "#f4f3f4"}
+                                                                        ios_backgroundColor="#3e3e3e"
+                                                                        onValueChange={(val) => this.setValueData(field.name,val,'boolean')}
+                                                                        value={this.state[ field.name ]}
+                                                                    />
+                                                                </View>
+                                                                {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
+                                                            </View>
+                                                        )
+                                                    }else if (field.type.name == 'date' ) {
+                                                        return (
+                                                            <View key={field.name}>
+                                                                {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
+                                                                <Button  style = {styles.submitButtonCancel} onPress={()=>this.showDateTimeField(field.name)}>
+                                                                    <Text style = {styles.submitButtonText}>{this.state.PortalVtigerData[ field.name ]}</Text>
+                                                                </Button>
+                                                                {this.state.PortalVtigerDateTimeShow[field.name] && (
+                                                                    <DateTimePicker
+                                                                        value={this.state[ field.name ]}
+                                                                        mode='date'
+                                                                        is24Hour={true}
+                                                                        display="default"
+                                                                        onChange={(event, selectedDate)=>{this.state.PortalVtigerDateTimeShow[field.name] = false ;this.setValueData(field.name,selectedDate,'date')}}
+                                                                        />
+                                                                )}
+                                                                {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
+                                                            </View>
+                                                        )
+                                                    }else if (field.type.name == 'time' ) {
+                                                        return (
+                                                            <View key={field.name}>
+                                                                {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
+                                                                
+                                                                <Button  style = {styles.submitButtonCancel} onPress={()=>this.showDateTimeField(field.name)}>
+                                                                    <Text style = {styles.submitButtonText}>{this.state.PortalVtigerData[ field.name ]}</Text>
+                                                                </Button>
+                                                                {this.state.PortalVtigerDateTimeShow[field.name] && (
+                                                                    <DateTimePicker
+                                                                        value={this.state[ field.name ]}
+                                                                        mode='time'
+                                                                        is24Hour={true}
+                                                                        display="default"
+                                                                        onChange={(event, selectedDate)=>{this.state.PortalVtigerDateTimeShow[field.name] = false ;this.setValueData(field.name,selectedDate,'time')}}
+                                                                        />
+                                                                )}
+                                                                {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
+                                                            </View>
+                                                        )
+                                                    }else if (field.type.name == 'reference' ) {
+                                                        return (
+                                                            <View key={field.name}>
+                                                                {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
+                                                                {this.state.PortalVtigerRefersTo[field.name] ?<Dropdown
+                                                                    style={styles.dropdown}
+                                                                    placeholderStyle={styles.placeholderStyle}
+                                                                    selectedTextStyle={styles.selectedTextStyle}
+                                                                    inputSearchStyle={styles.inputSearchStyle}
+                                                                    iconStyle={styles.iconStyle}
+                                                                    data={this.state.PortalVtigerRefersTo[field.name]}
+                                                                    search
+                                                                    maxHeight={300}
+                                                                    labelField="label"
+                                                                    valueField="id"
+                                                                    placeholder={vtranslate("Select item")}
+                                                                    searchPlaceholder={vtranslate("Search...")}
+                                                                    value={this.state[ field.name ]}
+                                                                    onChange={item => {
+                                                                        this.setValueData(field.name,item.id,'reference');
+                                                                    }}
+                                                                    renderLeftIcon={() => (
+                                                                        <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
+                                                                    )}
+                                                                    />:null}
+                                                                {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
+                                                            </View>
+                                                        )
+                                                    }else{
+                                                        return (
+                                                            <View key={field.name}>
+                                                                {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
+                                                                <TextInput style = {styles.inputText} ref={field.name} onChangeText={(val) => this.setValueData(field.name,val,'string')} value={this.state[ field.name ]} />
+                                                                {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
+                                                            </View>
+                                                        )
+                                                    }
+                                                }
+                                            })} 
+                                        </View>
+                                        
+                                        <View>
+                                            {Object.entries(describeModule['describe']['fields']).sort((a, b) => Number(a[0]) > Number(b[0]) ? 1 : -1).map((fields ) => {
+                                                let field = fields[1];
+                                                if (field.type.name === "text" && field.editable) {
+                                                    return (
+                                                        <View key={field.name}>
+                                                            {field.mandatory?<Text style = {styles.stare}>{field.label} * : </Text>:<Text>{field.label} : </Text>}
+                                                            <TextInput multiline={true} style = {styles.inputTextArea} ref={field.name} onChangeText={(val) => this.setValueData(field.name,val,'string')} value={this.state[ field.name ]} />
+                                                            {this.isFieldInError(field.name) && this.getErrorsInField(field.name).map(errorMessage => <Text key={errorMessage} style={styles.error}>{errorMessage}</Text>)}
+                                                        </View>
+                                                    )
+                                                }
+                                            })} 
+                                        </View>
+                                    </View>
+                                    {/* <Text>
+                                        {this.getErrorMessages()}
+                                    </Text> */}
+                        </View>
+                    :<View><Text style ={{textAlign:'center',padding : 25}}>{vtranslate("Loading")}</Text><ActivityIndicator style ={{textAlign:'center',padding : 25}} animating={true} color='#000' /></View>
+                }
+                <Divider style = {styles.Divider} /> 
+                {(describeModule['describe'] && describeModule['describe']['fields'])?
                     <Button style = {styles.TextStatusSave} color={"#fff"} onPress={() => this.state.PortalVtigerDisableButton? {} : this._onSubmit()}>
                         <Text style = {styles.submitButtonText}>{ this.state.PortalVtigerDisableButton ? vtranslate("Loading"): vtranslate("Save")}</Text>
                     </Button>
-                    <Button style = {styles.submitButtonCancel} color={"#000"} onPress={() => this.close()}><Text style = {styles.submitButtonText}>{vtranslate("Cancel")}</Text></Button>
-                </ScrollView> 
-            )
-        }
-        return null;
+                :null}
+                <Button style = {styles.submitButtonCancel} color={"#000"} onPress={() => this.close()}><Text style = {styles.submitButtonText}>{vtranslate("Cancel")}</Text></Button>
+            </ScrollView> 
+        )
     }
 }
 

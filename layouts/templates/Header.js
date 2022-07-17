@@ -3,6 +3,7 @@ import { Modal, Text,View, StyleSheet,Image,ScrollView ,Dimensions} from 'react-
 import '../../global.js' 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {vtranslate,updateLang,fetchModules} from '../../Functions/Portal' ;
+import { Appbar } from 'react-native-paper';
 
 
 import Home from './Portal/Home.js'
@@ -19,11 +20,12 @@ class Header extends Component {
       lang: 'en_us',
       module: 'Home',
       fetch_modules:{},
+      company_detail :{},
       modules_header:{},
       visible : false ,
       header_no_show : ['Contacts','Accounts','ProjectTask','ProjectMilestone'],
       loginView : 'false',
-      heightHome : Dimensions.get('window').height-180
+      heightHome : Dimensions.get('window').height-140
    }
 
    componentDidMount = async () => {
@@ -54,6 +56,7 @@ class Header extends Component {
                 this.setState({ 'password': value })
             }
         })
+        
         let email =this.state.email
         let pass = this.state.password;
         if(email && pass ){
@@ -84,6 +87,24 @@ class Header extends Component {
 
             
             })
+            await AsyncStorage.getItem('company_detail').then(async(value) => {
+               var company_detail ='';
+               try{
+                   if(value){
+                           company_detail = JSON.parse(value);
+                           this.setState({ 'company_detail': company_detail });
+                   }
+               }catch(error){
+                       company_detail ='';
+               }
+               if(company_detail == ''){
+                       company_detail = await fetchCompanyTitle(email,pass);
+                       if(company_detail){
+                       AsyncStorage.setItem('company_detail', JSON.stringify(company_detail));
+                       this.setState({ company_detail: company_detail });
+                       }
+               }
+           });
         }
     
     }
@@ -194,12 +215,18 @@ class Header extends Component {
          // alert(JSON.stringify(this.state.fetch_modules['modules']['types']))
          return (
             <View>
-               <View style = {styles.container}>
-                  <Image style ={styles.imagHeader} source={require('../../assets/favicon.png')} />
+               <View>
+                  <Appbar.Header style = {styles.container}>
+                     <Image style ={styles.imagHeader} source={require('../../assets/favicon.png')} />
+                     <Appbar.Content title={this.state.company_detail['organizationname']} />
+                     <Appbar.Action icon="magnify"/>
+                     <Appbar.Action icon="dots-vertical" onPress={this.openMenu} />
+                  </Appbar.Header>
+                  {/* <Image style ={styles.imagHeader} source={require('../../assets/favicon.png')} /> */}
                   <Provider>
-                     <View style = {styles.menuHeader}>
+                     {/* <View style = {styles.menuHeader}>
                         <Button color="#fff" icon="menu" onPress={this.openMenu} ></Button>
-                     </View>   
+                     </View>    */}
                   
                      <Modal animationType = {"slide"} transparent = {false}
                         visible = {this.state.visible}>
@@ -239,9 +266,12 @@ class Header extends Component {
       }else{
          return (
             <View>
-               <View style = {styles.container}>
+               <Appbar.Header style = {styles.container}>
+                  {/* <Appbar.Content title={this.state.company_detail['organizationname']} />*/}
                   <Image style ={styles.imagHeader} source={require('../../assets/favicon.png')} />
-               </View>
+                  {/* <Appbar.Action icon="magnify"/> */}
+                  {/* <Appbar.Action icon="dots-vertical" onPress={this.openMenu} /> */}
+               </Appbar.Header>
 
                <ScrollView style={{ height : this.state.heightHome , maxHeight: this.state.heightHome }}>
                   <Login investmentHandler={this.loadLogin}/>
@@ -258,10 +288,13 @@ export default Header
 
 const styles = StyleSheet.create({
    container: {
-      paddingTop: 23,
-      marginTop : 40,
+      // paddingTop: 23,
+      // marginTop : 40,
       backgroundColor : color_bg,
-      height : 80
+      // height : 80,
+      left : 0 ,
+      right : 0,
+      top : 0
    },
    imagHeader :{
       width : 180,
