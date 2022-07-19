@@ -10,6 +10,8 @@ import HelpDeskAdd from './Add'
 import '../../../global.js' 
 class Index extends Component {
     state = {
+        email : '',
+        password : '',
         company_detail : {},
         fetchRecords : {},
         fetch_modules : {},
@@ -17,7 +19,10 @@ class Index extends Component {
         mode : 'mine' ,
         show_help_desk_add : false,
         describeModule : {} ,
-        counShowHeader : 5
+        counShowHeader : 5 ,
+        perPage : 5 ,
+        page : 0,
+        module : 'HelpDesk'
     }
 
     componentDidMount = async () => {
@@ -85,7 +90,7 @@ class Index extends Component {
 
             })
 
-            var describ = await describeModule(email,pass,"HelpDesk");
+            var describ = await describeModule(email,pass,this.state.module);
             
             if(describ['describe']['fields']){
                 var fields = {};
@@ -97,20 +102,22 @@ class Index extends Component {
                 this.setState({ 'describeModule': fields});
             }
             
-            this.setState({ 'fetchRecords': await fetchRecords(email,pass,"HelpDesk", "HelpDesk", {"mode":this.state.mode}, false , 0, 5, '', '') });
+            this.fetchRecordsMe();
         }
 
     }
 
     setStateMode = (mode) => {
-        this.setState({mode : mode});
+        this.state.mode = mode;
+        this.setState({'mode' : mode});
         this.fetchRecordsMe();
     }
 
     fetchRecordsMe = async() =>{
+        this.setState({ 'fetchRecords': {} });
         let email =this.state.email
         let pass = this.state.password;
-        this.setState({ 'fetchRecords': await fetchRecords(email,pass,"HelpDesk", "HelpDesk", {"mode":this.state.mode}, false , 0, 3, '', '') });
+        this.setState({ 'fetchRecords': await fetchRecords(email,pass,this.state.module, this.state.module, {"mode":this.state.mode}, false ,this.state.page, this.state.perPage, '', '') });
     }
 
     loadAddModal = () => {
@@ -124,7 +131,7 @@ class Index extends Component {
                 <ScrollView >
                     <View style={{height:this.state.heightHome}}>
                         <Text style={styles.moduleTitle}>
-                            {this.state.fetch_modules['modules']['information']["HelpDesk"].uiLabel}
+                            {this.state.fetch_modules['modules']['information'][this.state.module].uiLabel}
                         </Text>
                         <Appbar style={styles.Appbar}>
                             <Button style={this.state.mode == 'all' ? styles.mode:styles.modeSelect} color={this.state.mode == 'all' ? '#000':'#fff'}
@@ -153,7 +160,7 @@ class Index extends Component {
                                      if (Number(record[0])){
                                         show_header = 0;
                                         return (
-                                            <DataTable.Row style={styles.DataTableHeader}>
+                                            <DataTable.Row key={record[0]} style={styles.DataTableHeader}>
                                                 { (Object.entries(record[1]).map((row ) => {
                                                     if (row[0] != 'id' && this.state.describeModule[row[0]] && show_header  < this.state.counShowHeader){
                                                         show_header++;
@@ -176,12 +183,14 @@ class Index extends Component {
                                 <HelpDeskAdd investmentHandler={this.loadAddModal}/>
                         </Modal>
                     </View>
-                    <FAB
-                        style={styles.fab}
-                        small
-                        icon="plus"
-                        onPress={() => this.setState({ show_help_desk_add : true })}
-                    />
+                    {this.state.fetch_modules['modules']['information'][this.state.module].create == '1'?
+                        <FAB
+                                style={styles.fab}
+                                small
+                                icon="plus"
+                                onPress={() => this.setState({ show_help_desk_add : true })}
+                            />:null
+                    }
                 </ScrollView> 
             )
         }else{

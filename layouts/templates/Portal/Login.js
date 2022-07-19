@@ -23,6 +23,9 @@ const data_lang = [
 
 class Login extends Component {
    state = {
+      lang:"",
+      loginView : 'true',
+      disableButton : false,
    }
 
    componentDidMount = () => {
@@ -52,6 +55,11 @@ class Login extends Component {
    }
 
    login = async(email, pass) => {
+      if(this.state.disableButton){
+         return;
+     }
+     this.state.disableButton = true;
+      this.setState({ 'disableButton': true });
       var error ='';
       if(email.trim() == ""){
          error = error + '\n'+ vtranslate('Enter your email address.')
@@ -83,6 +91,7 @@ class Login extends Component {
          }
       
 
+         this.setState({ 'disableButton': false });
          alert(login);
          // alert('ایمیل: ' + email + '\n پسورد: ' + pass)
       }
@@ -161,7 +170,7 @@ class Login extends Component {
                onPress = {
                   () => this.login(this.state.email, this.state.password)
                }>
-               <Text style = {styles.submitButtonTextLogin}> {vtranslate('Sign in')} </Text>
+               <Text style = {styles.submitButtonTextLogin}> {this.state.disableButton ? vtranslate("Loading"):vtranslate('Sign in')} </Text>
             </TouchableOpacity>
          </View>
       )

@@ -44,7 +44,11 @@ class Add extends ValidationComponent {
     }
       
     _onSubmit = async() => {
-        
+
+        if(this.state.PortalVtigerDisableButton){
+            return;
+        }
+        this.state.PortalVtigerDisableButton = true;
         this.setStateME({ 'PortalVtigerDisableButton': true });
         this.validate(this.state.PortalVtigerValidate);
         if(this.getErrorMessages()){

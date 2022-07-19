@@ -354,12 +354,12 @@ export const  fetchRecords = async (user_name,password,module, label, q, filter 
 
     if (result.hasOwnProperty('error') && result['error'].hasOwnProperty('message') ){
         alert(vtranslate(result['error']['message']));
-        return false;
+        return {count :0};
     }else if (result.hasOwnProperty('success') && result.hasOwnProperty('result') && result['success']==true  ) {
         return result['result'];
     } else {
         alert(JSON.stringify(result));
-        return false;
+        return  {count :0};
     }
 
 }

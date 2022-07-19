@@ -193,8 +193,17 @@ class Header extends Component {
               }
          }
 
-     
+
      })
+
+     AsyncStorage.getItem('module').then((value) => {
+      if(value){
+          this.setState({ 'module': value })
+      }else{
+          AsyncStorage.setItem('module', 'Home');
+          this.setState({ 'module': 'Home' })
+      }
+  });
 
    }
    
@@ -291,7 +300,7 @@ const styles = StyleSheet.create({
       // paddingTop: 23,
       // marginTop : 40,
       backgroundColor : color_bg,
-      // height : 80,
+      height : 70,
       left : 0 ,
       right : 0,
       top : 0
