@@ -2,6 +2,8 @@ import  { Component } from 'react'
 import {View, Text, StyleSheet ,ScrollView ,Dimensions,Modal} from 'react-native'
 import {fetchCompanyTitle,updateLang,vtranslate,fetchRecords,describeModule} from '../../../Functions/Portal' ;
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Dropdown  } from 'react-native-element-dropdown';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import { DataTable,Appbar,FAB,Button,ActivityIndicator  } from 'react-native-paper';
 
@@ -20,7 +22,8 @@ class Index extends Component {
         show_help_desk_add : false,
         describeModule : {} ,
         counShowHeader : 5 ,
-        perPage : 5 ,
+        perPage : 10 ,
+        ticketstatus : 'ALL',
         page : 0,
         module : 'HelpDesk'
     }
@@ -42,6 +45,13 @@ class Index extends Component {
             if(value){
                 this.setState({ 'password': value })
             }
+        })
+        await AsyncStorage.getItem('help_desk_status').then((value) => {
+            if(value){
+                this.setState({ 'ticketstatus': value })
+            }
+            
+            AsyncStorage.setItem('help_desk_status', 'ALL');
         })
         let email =this.state.email
         let pass = this.state.password;
@@ -96,7 +106,7 @@ class Index extends Component {
                 var fields = {};
                 Object.entries(describ['describe']['fields']).map( field_obj =>{
                     let field = field_obj[1];
-                    fields[field.name]=field.label;
+                    fields[field.name]=field;
                 })
 
                 this.setState({ 'describeModule': fields});
@@ -108,8 +118,24 @@ class Index extends Component {
     }
 
     setStateMode = (mode) => {
+        this.state.page = 0;
+        this.setState({'page' : 0});
         this.state.mode = mode;
         this.setState({'mode' : mode});
+        this.fetchRecordsMe();
+    }
+
+    setTicketStatus = (status) => {
+        this.state.page = 0;
+        this.setState({'page' : 0});
+        this.state.ticketstatus = status;
+        this.setState({'ticketstatus' : status});
+        this.fetchRecordsMe();
+    }
+
+    setPage = (page) => {
+        this.state.page = page;
+        this.setState({'page' : page});
         this.fetchRecordsMe();
     }
 
@@ -117,7 +143,12 @@ class Index extends Component {
         this.setState({ 'fetchRecords': {} });
         let email =this.state.email
         let pass = this.state.password;
-        this.setState({ 'fetchRecords': await fetchRecords(email,pass,this.state.module, this.state.module, {"mode":this.state.mode}, false ,this.state.page, this.state.perPage, '', '') });
+        var filter = false;
+        if(this.state.ticketstatus.toUpperCase() !== "ALL"){
+            filter = JSON.stringify({"ticketstatus":this.state.ticketstatus})
+        }
+        // alert(this.state.module + " module : " +  this.state.module+ " mode : " + this.state.mode+ " filter : " + filter + " page : " +this.state.page+ " perPage : " + this.state.perPage,);
+        this.setState({ 'fetchRecords': await fetchRecords(email,pass,this.state.module, this.state.module, {"mode":this.state.mode}, filter ,this.state.page, this.state.perPage, '', '') });
     }
 
     loadAddModal = () => {
@@ -140,7 +171,28 @@ class Index extends Component {
                             <Button style={this.state.mode == 'all' ? styles.modeSelect:styles.mode} color={this.state.mode == 'all' ? '#fff':'#000'}
                                 onPress={() => this.setStateMode("all")}
                             >{vtranslate("All")}</Button>
-                           
+                            {this.state.describeModule['ticketstatus']?<Dropdown
+                                style={styles.dropdown}
+                                placeholderStyle={styles.placeholderStyle}
+                                selectedTextStyle={styles.selectedTextStyle}
+                                inputSearchStyle={styles.inputSearchStyle}
+                                iconStyle={styles.iconStyle}
+                                data={[{"label": vtranslate('All Tickets'),
+                                "value": 'ALL'}].concat(this.state.describeModule['ticketstatus'].type.picklistValues)}
+                                search
+                                maxHeight={300}
+                                labelField="label"
+                                valueField="value"
+                                placeholder={vtranslate("Select item")}
+                                searchPlaceholder={vtranslate("Search...")}
+                                value={this.state.ticketstatus}
+                                onChange={item => {
+                                    this.setTicketStatus( item.value );
+                                }}
+                                renderLeftIcon={() => (
+                                    <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
+                                )}
+                                />:null}
                         </Appbar>
                         <ScrollView horizontal>
                             <DataTable style={styles.DataTable}>
@@ -149,7 +201,7 @@ class Index extends Component {
                                         if (row[0] != 'id' && this.state.describeModule[row[0]] && show_header  < this.state.counShowHeader){
                                             show_header++;
                                             return (
-                                                <DataTable.Title key={row[0]}>{this.state.describeModule[row[0]]}</DataTable.Title>
+                                                <DataTable.Title key={row[0]}>{this.state.describeModule[row[0]].label}</DataTable.Title>
                                             );
                                         }
                                         return null;
@@ -157,7 +209,7 @@ class Index extends Component {
                                 </DataTable.Header>
                                 
                                 { (Object.entries(this.state.fetchRecords).sort((a, b) => Number(a[0]) > Number(b[0]) ? 1 : -1).map((record ) => {
-                                     if (Number(record[0])){
+                                     if (Number(record[0]) >= 0){
                                         show_header = 0;
                                         return (
                                             <DataTable.Row key={record[0]} style={styles.DataTableHeader}>
@@ -174,6 +226,16 @@ class Index extends Component {
                                         );
                                     }
                                 }))}
+                                {this.state.fetchRecords['count'] > 0 ?
+                                    <DataTable.Pagination
+                                        page={this.state.page}
+                                        numberOfPages={Math.ceil(this.state.fetchRecords['count']/this.state.perPage)}
+                                        onPageChange={(page) => this.setPage(page)}
+                                        label={`${this.state.page +1} of ${Math.ceil(this.state.fetchRecords['count']/this.state.perPage)}`}
+                                        showFastPagination
+                                        optionsLabel={'Rows per page'}
+                                    />
+                                :null}
                             </DataTable>
                         </ScrollView>
                     </View> 
@@ -252,5 +314,23 @@ const styles = StyleSheet.create({
         textAlign : 'center',
         color : '#428bca',
 
-    }
+    },
+    dropdown: {
+        height: 50,
+        width : 200 ,
+        backgroundColor: 'transparent',
+        borderBottomColor: 'gray',
+        borderBottomWidth: 0.5,
+        margin : 15
+    },
+    placeholderStyle: {
+        fontSize: 16,
+    },
+    selectedTextStyle: {
+        fontSize: 14,
+    },
+    iconStyle: {
+        width: 20,
+        height: 20,
+    },
 });
