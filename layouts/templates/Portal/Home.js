@@ -96,6 +96,7 @@ class Home extends Component {
 			this.loadAddModule(actionConfig[action]);
 		}
 		if (serviceConfig.hasOwnProperty(action)) {
+            AsyncStorage.setItem('record_id', 'false');
             AsyncStorage.setItem('help_desk_status', 'Open');
 			this.setModule(serviceConfig[action]);
 		}

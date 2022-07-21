@@ -1,11 +1,8 @@
 import  { Component } from 'react'
+import {View, Text  } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import ListHelpDesk  from './List'
-import DetailHelpDesk  from './Detail'
-
-
-class Index extends Component {
+class ModComments extends Component {
     state = {
         record_id : 'false',
     }
@@ -23,16 +20,14 @@ class Index extends Component {
      }
 
     render() {
-        if(this.state.record_id.includes("x")){
-            return (
-                <DetailHelpDesk investmentHandler={this.loadRecord}/>
-            )
-        }else{
-            return (
-                <ListHelpDesk investmentHandler={this.loadRecord}/>
-            )
-        }
+        return (
+            <View>
+                <Text>
+                    ModComments :  {this.state.record_id}
+                </Text>
+            </View> 
+        )
     }
 }
 
-export default Index
+export default ModComments

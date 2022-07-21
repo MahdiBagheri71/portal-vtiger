@@ -25,7 +25,7 @@ class Header extends Component {
       visible : false ,
       header_no_show : ['Contacts','Accounts','ProjectTask','ProjectMilestone'],
       loginView : 'false',
-      heightHome : Dimensions.get('window').height-140
+      heightHome : Dimensions.get('window').height-158
    }
 
    componentDidMount = async () => {
@@ -109,29 +109,29 @@ class Header extends Component {
     
     }
 
-    logout = () => {
-        AsyncStorage.setItem('email', '');
-        AsyncStorage.setItem('password', '');
-        AsyncStorage.setItem('loginView', "true");
-        AsyncStorage.setItem('fetch_modules', '');
-        AsyncStorage.setItem('module', 'Login');
-        this.setState({ module: 'Login' });
-        
-        
-        this.setState({ email: '' })
-        this.setState({ password: '' })
-        this.setState({ loginView: 'true' });
-        this.setState({ visible: false });
-        this.setState({ fetch_modules: {} });
-    }
+   logout = () => {
+      AsyncStorage.setItem('email', '');
+      AsyncStorage.setItem('password', '');
+      AsyncStorage.setItem('loginView', "true");
+      AsyncStorage.setItem('fetch_modules', '');
+      AsyncStorage.setItem('module', 'Login');
+      this.setState({ module: 'Login' });
+      
+      
+      this.setState({ email: '' })
+      this.setState({ password: '' })
+      this.setState({ loginView: 'true' });
+      this.setState({ visible: false });
+      this.setState({ fetch_modules: {} });
+   }
 
-    openMenu = ()=>{
+   openMenu = ()=>{
       this.setState({ visible: true })
-    }
+   }
 
-    closeMenu = ()=>{
+   closeMenu = ()=>{
       this.setState({ visible: false })
-    }
+   }
 
    setModule = (module) => {
       this.setState({ module: module })
@@ -196,14 +196,14 @@ class Header extends Component {
 
      })
 
-     AsyncStorage.getItem('module').then((value) => {
-      if(value){
-          this.setState({ 'module': value })
-      }else{
-          AsyncStorage.setItem('module', 'Home');
-          this.setState({ 'module': 'Home' })
-      }
-  });
+      AsyncStorage.getItem('module').then((value) => {
+         if(value){
+            this.setState({ 'module': value })
+         }else{
+            AsyncStorage.setItem('module', 'Home');
+            this.setState({ 'module': 'Home' })
+         }
+      });
 
    }
    
@@ -282,7 +282,7 @@ class Header extends Component {
                   {/* <Appbar.Action icon="dots-vertical" onPress={this.openMenu} /> */}
                </Appbar.Header>
 
-               <ScrollView style={{ height : this.state.heightHome , maxHeight: this.state.heightHome }}>
+               <ScrollView style={{ height : this.state.heightHome , maxHeight: this.state.heightHome , marginTop : 15 , paddingBottom : 25 }}>
                   <Login investmentHandler={this.loadLogin}/>
                </ScrollView>
 

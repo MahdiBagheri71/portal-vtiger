@@ -181,7 +181,7 @@ export default Login
 const styles = StyleSheet.create({
    containerLogin: {
       paddingTop: 23,
-      marginTop : 5,
+      marginTop : 15,
    },
    headerTextLogin : {
       textAlign :  'center',

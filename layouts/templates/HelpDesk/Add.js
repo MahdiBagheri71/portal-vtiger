@@ -20,7 +20,8 @@ class Add extends ValidationComponent {
         PortalVtigerData : {},
         PortalVtigerValidate : {},
         PortalVtigerDateTimeShow : {},
-        PortalVtigerRefersTo : {}
+        PortalVtigerRefersTo : {},
+        PortalVtigerModule : "HelpDesk"
     }
 
     constructor(props) {
@@ -59,11 +60,11 @@ class Add extends ValidationComponent {
             let email =this.state.PortalVtigerEmail
             let pass = this.state.PortalVtigerPassword;
             var data =JSON.stringify(this.state.PortalVtigerData);
-            var result = await saveRecord(email,pass,'HelpDesk',data,false);
+            var result = await saveRecord(email,pass,this.state.PortalVtigerModule,data,false);
             if(result["record"] && result["record"]['id']){
                 AsyncStorage.setItem('record_id', result["record"]['id']);
             }
-            AsyncStorage.setItem('module', "HelpDesk");
+            AsyncStorage.setItem('module', this.state.PortalVtigerModule);
             this.props.investmentHandler();
             this.setStateME({ 'PortalVtigerDisableButton': false });
             return result;
@@ -93,7 +94,7 @@ class Add extends ValidationComponent {
         let email =this.state.PortalVtigerEmail
         let pass = this.state.PortalVtigerPassword;
         if(email && pass ){
-            var describe_module = await describeModule(email,pass,"HelpDesk") ;
+            var describe_module = await describeModule(email,pass,this.state.PortalVtigerModule) ;
             this.setStateME({ 'PortalVtigerDescribeModule': describe_module});
             
             if(describe_module['describe'] && describe_module['describe']['fields'] ){
