@@ -59,32 +59,30 @@ class ModComments extends Component {
     
     downloadFileMe = async (fileString, fileName ,fileType) => {
         try {
-          const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
-          if (!permissions.granted) {
-            return;
-          }
+            const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+            if (!permissions.granted) {
+                alert("Not Permissions");
+                return;
+            }
     
-          try {
-            await StorageAccessFramework.createFileAsync(permissions.directoryUri, fileName, fileType)
-              .then(async (uri) => {
-                await FileSystem.writeAsStringAsync(uri, fileString, { encoding: FileSystem.EncodingType.Base64 });
-                alert(vtranslate('Downloaded Successfully'));
-              })
-              .catch((e) => {
-            
+            try {
+                await StorageAccessFramework.createFileAsync(permissions.directoryUri, fileName, fileType)
+                .then(async (uri) => {
+                    await FileSystem.writeAsStringAsync(uri, fileString, { encoding: FileSystem.EncodingType.Base64 });
+                    alert(vtranslate('Downloaded Successfully'));
+                })
+                .catch((e) => {
+                    alert(e)
+                });
+            } catch (e) {
                 alert(e)
-              });
-          } catch (e) {
-            
-            alert(e)
-            throw new Error(e);
-          }
-    
+                throw new Error(e);
+            }
+        
         } catch (err) {
-            
             alert(err)
         }
-      }
+    }
 
     downloadCommentFile = async(module, commentId, attachmentId) => {
         let email =this.state.email

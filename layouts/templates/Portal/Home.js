@@ -78,6 +78,7 @@ class Home extends Component {
 
     loadAddModule = (module) => {
         if(module == "Documents"){
+            AsyncStorage.setItem('parentIdDocuments', '');
             this.setState({ show_documens_add : true });
         }else{
             this.setState({ show_help_desk_add : true });

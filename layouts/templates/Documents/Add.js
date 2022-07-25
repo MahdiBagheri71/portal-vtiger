@@ -13,7 +13,8 @@ class Add extends Component {
         nameFile : '',
         email: '',
         password: '',
-        disableButton : false
+        disableButton : false,
+        parentId : ''
     }
     
 
@@ -27,6 +28,11 @@ class Add extends Component {
         await AsyncStorage.getItem('password').then((value) => {
             if(value){
                 this.setState({ 'password': value })
+            }
+        })
+        await AsyncStorage.getItem('parentIdDocuments').then((value) => {
+            if(value){
+                this.setState({ 'parentId': value })
             }
         })
 
@@ -51,7 +57,7 @@ class Add extends Component {
             });
             data.append("_operation", "SaveRecord");
             data.append("module", "Documents");
-            data.append("parentId", "");
+            data.append("parentId", this.state.parentId);
             data.append("filename", fileToUpload.name);
             data.append("username", email);
             data.append("password", pass);
@@ -65,10 +71,12 @@ class Add extends Component {
                 return false;
             }else if (result.hasOwnProperty('success') && result.hasOwnProperty('result') && result['success']==true  ) {
                 
-                if(result['result']["record"] && result['result']["record"]['id']){
-                    AsyncStorage.setItem('record_id', result['result']["record"]['id']);
+                if(!this.state.parentId){
+                    if(result['result']["record"] && result['result']["record"]['id']){
+                        AsyncStorage.setItem('record_id', result['result']["record"]['id']);
+                    }
+                    AsyncStorage.setItem('module', "Documents");
                 }
-                AsyncStorage.setItem('module', "Documents");
                 this.props.investmentHandler();
                 return result['result'];
             } else {
