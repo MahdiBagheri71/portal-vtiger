@@ -17,7 +17,11 @@ class Documents extends Component {
         AsyncStorage.getItem('record_id').then((value) => {
             this.setState({ 'record_id': value })
         });
-     }
+    }
+
+    componentWillUnmount() {
+         this._isMounted = false;
+    }
 
     render() {
         return (

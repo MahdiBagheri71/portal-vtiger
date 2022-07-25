@@ -218,6 +218,10 @@ class Header extends Component {
            return <Home investmentHandler={this.loadModule}/>;
       }
    }
+
+   componentWillUnmount() {
+       this._isMounted = false;
+   }
     
    render() {
       if (this.state.loginView == 'false' && this.state.fetch_modules['modules'] ){

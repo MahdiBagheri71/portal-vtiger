@@ -163,6 +163,10 @@ class List extends Component {
         })
     }
 
+    componentWillUnmount() {
+        this._isMounted = false;
+    }
+
     setModuleID = (record_id) => {
         AsyncStorage.setItem('record_id', record_id);
         this.props.investmentHandler();
@@ -254,7 +258,7 @@ class List extends Component {
                                                             );
                                                         }else if(this.state.describeModule[row[0]]['type'].name == 'multipicklist'){
                                                             return (
-                                                                <DataTable.Cell key={row[1]}>{row[1].replace(' |##| ', ",")}</DataTable.Cell>
+                                                                <DataTable.Cell key={row[1]}>{row[1].replace(/ \|\#\#\| /ig, ",")}</DataTable.Cell>
                                                             )
                                                         }else if(this.state.describeModule[row[0]]['type'].name == 'double' || this.state.describeModule[row[0]]['type'].name == 'currency'){
                                                             return (

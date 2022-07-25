@@ -3,6 +3,10 @@ import {View, Text, StyleSheet,Linking  } from 'react-native'
 
 import '../../global.js' 
 class Footer extends Component {
+
+    componentWillUnmount() {
+        this._isMounted = false;
+    }
     render() {
         return (
             <View style = {styles.Footer}>

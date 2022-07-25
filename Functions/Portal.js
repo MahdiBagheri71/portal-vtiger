@@ -448,3 +448,96 @@ export const  fetchRecord = async (user_name,password,id,module,parentId) => {
     }
 
 }
+
+export const  fetchHistory = async (user_name,password,module,id,pageNo, pageLimit,parentId) => {
+
+    var details = {
+        '_operation': 'FetchHistory',
+        'record' : id,
+        'module' : module,
+        'page' : pageNo,
+        'pageLimit' : pageLimit,
+        'parentId' : parentId,
+        'username' : user_name,
+        'password' : password
+    };
+
+    var text = user_name+":"+password;
+    var encoded_base64 = base64.encode(text);
+
+    var result = await api(details,encoded_base64);
+
+    if (result.hasOwnProperty('error') && result['error'].hasOwnProperty('message') ){
+        alert(vtranslate(result['error']['message']));
+        return false;
+    }else if (result.hasOwnProperty('success') && result.hasOwnProperty('result') && result['success']==true  ) {
+        return result['result'];
+    } else {
+        alert(JSON.stringify(result));
+        return false;
+    }
+
+}
+
+export const  fetchRelatedRecords = async (user_name,password,relatedModule, relatedModuleLabel,id,parentId,pageNo, pageLimit,module) => {
+
+    var details = {
+        '_operation': 'FetchRelatedRecords',
+        'recordId' : id,
+        'module' : module,
+        'page' : pageNo,
+        'pageLimit' : pageLimit,
+        'parentId' : parentId,
+        'username' : user_name,
+        'password' : password,
+        'relatedModule' : relatedModule,
+        'relatedModuleLabel' : relatedModuleLabel
+    };
+
+    var text = user_name+":"+password;
+    var encoded_base64 = base64.encode(text);
+
+    var result = await api(details,encoded_base64);
+
+    if (result.hasOwnProperty('error') && result['error'].hasOwnProperty('message') ){
+        alert(vtranslate(result['error']['message']));
+        return false;
+    }else if (result.hasOwnProperty('success') && result.hasOwnProperty('result') && result['success']==true  ) {
+        return result['result'];
+    } else {
+        alert(JSON.stringify(result));
+        return false;
+    }
+
+}
+
+export const  downloadFile = async (user_name,password,module, q, parentId, parentModule, attachmentId) => {
+
+    var details = {
+        '_operation' : 'DownloadFile',
+        'module' : module,
+        'moduleLabel' : module,
+        'recordId' : q,
+        'parentId' : parentId,
+        'parentModule' : parentModule,
+        'attachmentId' : attachmentId,
+        'username' : user_name,
+        'password' : password
+    };
+
+    var text = user_name+":"+password;
+    var encoded_base64 = base64.encode(text);
+
+    var result = await api(details,encoded_base64);
+
+    if (result.hasOwnProperty('error') && result['error'].hasOwnProperty('message') ){
+        alert(vtranslate(result['error']['message']));
+        return false;
+    }else if (result.hasOwnProperty('success') && result.hasOwnProperty('result') && result['success']==true  ) {
+        return result['result'];
+    } else {
+        alert(JSON.stringify(result));
+        return false;
+    }
+
+}

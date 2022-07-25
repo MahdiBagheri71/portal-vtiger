@@ -107,6 +107,10 @@ class Home extends Component {
         this.setModule(module);
     }
 
+    componentWillUnmount() {
+        this._isMounted = false;
+    }
+
     recentHelpDesk = () =>{
         var fetchRecentRecords = this.state.fetchRecentRecords;
         if(fetchRecentRecords[0] && fetchRecentRecords[0]['HelpDesk']){

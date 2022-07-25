@@ -59,7 +59,11 @@ class Detail extends Component {
         AsyncStorage.getItem('record_id').then((value) => {
             this.setState({ 'record_id': value })
         });
-     }
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
+    }
 
     render() {
         if(this.state.record_id.includes("x") && this.state.record['record']){
@@ -85,7 +89,7 @@ class Detail extends Component {
                                 return (
                                     <View key={row[0]} style={styles.recordField}>
                                         <Text style={styles.recordLabel}>{this.state.describeModule[row[0]].label}</Text>
-                                        <Text style={styles.recordValue} key={row[1]}>{row[1].replace(' |##| ', ",")}</Text>
+                                        <Text style={styles.recordValue} key={row[1]}>{row[1].replace(/ \|\#\#\| /ig, ",")}</Text>
                                     </View>
                                 )
                             }else if(this.state.describeModule[row[0]]['type'].name == 'double' || this.state.describeModule[row[0]]['type'].name == 'currency'){
@@ -128,8 +132,6 @@ class Detail extends Component {
 }
 
 export default Detail
-
-
 
 const styles = StyleSheet.create({
     recordField : {

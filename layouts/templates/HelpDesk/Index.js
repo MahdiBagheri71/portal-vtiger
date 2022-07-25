@@ -16,6 +16,10 @@ class Index extends Component {
         })
     }
 
+    componentWillUnmount() {
+        this._isMounted = false;
+    }
+
     loadRecord = () => {
         AsyncStorage.getItem('record_id').then((value) => {
             this.setState({ 'record_id': value })

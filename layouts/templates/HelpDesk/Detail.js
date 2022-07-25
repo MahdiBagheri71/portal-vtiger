@@ -1,6 +1,6 @@
 import  { Component } from 'react'
 import {View, Text ,StyleSheet } from 'react-native'
-import { BottomNavigation,ActivityIndicator } from 'react-native-paper';
+import { BottomNavigation,ActivityIndicator,Button } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {updateLang,vtranslate,fetchRelatedModules} from '../../../Functions/Portal' ;
 
@@ -23,7 +23,8 @@ class Detail extends Component {
             // { key: 'modComments', title: vtranslate('ModComments'), icon: 'comment'  },
             // { key: 'history', title: vtranslate('History'), icon: 'history'  },
             // { key: 'documents', title: vtranslate('Documents'), icon: 'file-document'  },
-          ]
+        ],
+        fetch_modules : {}
     }
 
     componentDidMount = async () => {
@@ -67,8 +68,37 @@ class Detail extends Component {
                     }
                 })
             }
-            this.setState({ 'routes': route })
+            this.setState({ 'routes': route });
+
+            await AsyncStorage.getItem('fetch_modules').then(async(value) => {
+                var fetch_modules ='';
+                try{
+                    if(value){
+                        fetch_modules = JSON.parse(value);
+                        this.setState({ 'fetch_modules': fetch_modules });
+                    }
+                }catch(error){
+                    fetch_modules ='';
+                }
+
+                if(fetch_modules == ''){
+                     fetch_modules = await fetchModules(email,pass);
+                     if(fetch_modules){
+                        AsyncStorage.setItem('fetch_modules', JSON.stringify(fetch_modules));
+                        
+                        AsyncStorage.setItem('email', email);
+                        AsyncStorage.setItem('password', pass);
+                        AsyncStorage.setItem('loginView', "false");
+                        this.setState({ fetch_modules: fetch_modules });
+                     }
+                }
+
+            })
         }
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
     }
 
     renderScene = ({ route, jumpTo }) => {}
@@ -90,16 +120,18 @@ class Detail extends Component {
         this.setState({ 'partials': this.state.routes[index]['key'] });
     }
 
-    loadRecord = () => {
-        AsyncStorage.getItem('record_id').then((value) => {
-            this.setState({ 'record_id': value })
-        });
-     }
+    loadList = () => {
+        AsyncStorage.setItem('record_id', 'false');
+        this.props.investmentHandler();
+    }
 
     render() {
         if(this.state.record_id.includes("x")){
             return (
                 <View>
+                    <Button icon="eye-arrow-right" style={styles.moduleTitle} mode="text" color="#428bca" onPress={() => this.loadList()}>
+                        {this.state.fetch_modules['modules'] ? this.state.fetch_modules['modules']['information'][this.state.module].uiLabel:null}
+                    </Button>
                     <BottomNavigation 
                         barStyle={{ backgroundColor: '#fefefe' }}
                         inactiveColor = "#2a6496"
@@ -130,5 +162,9 @@ const styles = StyleSheet.create({
     BottomNavigation : {
         top : 0,
         margin : 2 
-    }
+    } ,
+    moduleTitle : {
+        padding : 15 ,
+        fontSize : 16 
+    },
 })
