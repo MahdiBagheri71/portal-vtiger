@@ -1,8 +1,8 @@
 import  { Component } from 'react'
-import {View, Text,Dimensions,StyleSheet } from 'react-native'
+import {View, Text,Dimensions,StyleSheet,TextInput } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator,Button } from 'react-native-paper';
-import {updateLang,vtranslate,fetchRelatedRecords,downloadFile} from '../../../../Functions/Portal' ;
+import {updateLang,vtranslate,fetchRelatedRecords,downloadFile,addComment} from '../../../../Functions/Portal' ;
 import * as FileSystem from 'expo-file-system';
 const { StorageAccessFramework } = FileSystem;
 
@@ -14,6 +14,8 @@ class ModComments extends Component {
         comments : false ,
         module : 'HelpDesk',
         relatedModule : 'ModComments',
+        commentcontent : '',
+        disableButton : false
     }
 
     componentDidMount = async () => {
@@ -55,7 +57,7 @@ class ModComments extends Component {
         this._isMounted = false;
     }
     
-    downloadFileMe = async (fileString, fileName ,filetype) => {
+    downloadFileMe = async (fileString, fileName ,fileType) => {
         try {
           const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
           if (!permissions.granted) {
@@ -63,7 +65,7 @@ class ModComments extends Component {
           }
     
           try {
-            await StorageAccessFramework.createFileAsync(permissions.directoryUri, fileName, filetype)
+            await StorageAccessFramework.createFileAsync(permissions.directoryUri, fileName, fileType)
               .then(async (uri) => {
                 await FileSystem.writeAsStringAsync(uri, fileString, { encoding: FileSystem.EncodingType.Base64 });
                 alert(vtranslate('Downloaded Successfully'));
@@ -93,10 +95,35 @@ class ModComments extends Component {
         }
 	}
 
+    sendComment = async()=>{
+        this.setState({'disableButton' : true});
+        if(this.state.commentcontent){
+            let email =this.state.email
+            let pass = this.state.password;
+            let record_id = this.state.record_id;
+            var values = {"commentcontent":this.state.commentcontent,"parentId":"","related_to":record_id}
+            var commen  = await addComment(email,pass,JSON.stringify(values), '');
+            if(commen){
+                this.setState({"commentcontent":""});
+                this.setState({ 'comments': await fetchRelatedRecords(email,pass,this.state.relatedModule,this.state.relatedModule,record_id,0, 0,50,this.state.module)});
+            }
+            this.setState({'disableButton' : false});
+        }else{
+            this.setState({'disableButton' : false});
+            alert(vtranslate('The field "{0}" is mandatory.').replace('{0}','commentcontent'));
+        }
+    }
+
     render() {
         if(this.state.comments){
             return (
                 <View style={styles.commentContent}>
+                    <View>
+                        <TextInput multiline={true} style = {styles.inputTextArea} placeholder={vtranslate('Add your comment here')} onChangeText={(val) => this.setState({commentcontent : val})} value={this.state.commentcontent}/>
+                        <Button style = {styles.TextStatusSave} color={"#fff"} onPress={() => this.sendComment()}>
+                            <Text style = {styles.submitButtonText}>{ this.state.disableButton ? vtranslate("Loading"): vtranslate("Submit")}</Text>
+                        </Button>
+                    </View>
                     {this.state.comments.map((comment ,key) => {
                         return(
                             <View style={styles.commentRecord} key={key}>
@@ -156,8 +183,9 @@ const styles = StyleSheet.create({
         margin : 10
     },
     commentBullet:{
+        width: Dimensions.get('window').width-45 ,
         backgroundColor : '#428bca',
-        padding : 7,
+        padding : 3,
         marginBottom : 8
     },
     creator :{
@@ -174,5 +202,25 @@ const styles = StyleSheet.create({
     },
     attachment : {
         fontSize : 12
+    },
+    inputTextArea:{
+        width: Dimensions.get('window').width-45 ,
+        margin: 20,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        padding : 10
+    },
+    TextStatusSave:{
+        backgroundColor :'#5cb85c',
+        borderRadius : 5,
+        textAlign : 'center',
+        width : 'auto',
+        color : '#fff',
+        padding : 5,
+        margin : 5,
+        marginLeft : 25
+    },
+    submitButtonText : {
+        color : "#fff"
     }
 })

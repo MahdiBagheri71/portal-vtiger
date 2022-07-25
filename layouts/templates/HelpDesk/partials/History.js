@@ -304,9 +304,9 @@ const styles = StyleSheet.create({
         margin : 0
     },
     historyBullet:{
-        width: Dimensions.get('window').width -20,
+        width: Dimensions.get('window').width -15,
         backgroundColor : '#428bca',
-        padding : 7,
+        padding : 3,
         marginBottom : 8
     },
     historyContent:{

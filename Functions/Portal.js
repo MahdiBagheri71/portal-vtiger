@@ -541,3 +541,30 @@ export const  downloadFile = async (user_name,password,module, q, parentId, pare
     }
 
 }
+
+export const  addComment = async (user_name,password,values, parentId) => {
+
+    var details = {
+        '_operation' : 'AddComment',
+        'values' : values,
+        'parentId' : parentId,
+        'username' : user_name,
+        'password' : password
+    };
+
+    var text = user_name+":"+password;
+    var encoded_base64 = base64.encode(text);
+
+    var result = await api(details,encoded_base64);
+
+    if (result.hasOwnProperty('error') && result['error'].hasOwnProperty('message') ){
+        alert(vtranslate(result['error']['message']));
+        return false;
+    }else if (result.hasOwnProperty('success') && result.hasOwnProperty('result') && result['success']==true  ) {
+        return result['result'];
+    } else {
+        alert(JSON.stringify(result));
+        return false;
+    }
+
+}
