@@ -12,7 +12,7 @@ class ModComments extends Component {
         password : '',
         record_id : 'false',
         comments : false ,
-        module : 'HelpDesk',
+        module : '',
         relatedModule : 'ModComments',
         commentcontent : '',
         disableButton : false,
@@ -37,6 +37,12 @@ class ModComments extends Component {
         await AsyncStorage.getItem('password').then((value) => {
             if(value){
                 this.setState({ 'password': value })
+            }
+        })
+        
+        await AsyncStorage.getItem('module').then((value) => {
+            if(value){
+                this.setState({ 'module': value })
             }
         })
 

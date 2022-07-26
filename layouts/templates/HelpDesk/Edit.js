@@ -10,7 +10,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 import '../../../global.js' 
 
-class Add extends ValidationComponent {
+class Edit extends ValidationComponent {
 
     state = {
         PortalVtigerEmail: '',
@@ -21,6 +21,7 @@ class Add extends ValidationComponent {
         PortalVtigerValidate : {},
         PortalVtigerDateTimeShow : {},
         PortalVtigerRefersTo : {},
+        PortalVtigerRecord : {},
         PortalVtigerModule : "HelpDesk"
     }
 
@@ -60,7 +61,7 @@ class Add extends ValidationComponent {
             let email =this.state.PortalVtigerEmail
             let pass = this.state.PortalVtigerPassword;
             var data =JSON.stringify(this.state.PortalVtigerData);
-            var result = await saveRecord(email,pass,this.state.PortalVtigerModule,data,false);
+            var result = await saveRecord(email,pass,this.state.PortalVtigerModule,data,this.state.PortalVtigerRecord.id);
             if(result["record"] && result["record"]['id']){
                 AsyncStorage.setItem('record_id', result["record"]['id']);
             }
@@ -90,10 +91,16 @@ class Add extends ValidationComponent {
                 this.setStateME({ 'PortalVtigerPassword': value })
             }
         })
+        await AsyncStorage.getItem('record_loading').then((value) => {
+            if(value){
+                this.setStateME({ 'PortalVtigerRecord': JSON.parse(value) })
+            }
+        })
 
         let email =this.state.PortalVtigerEmail
         let pass = this.state.PortalVtigerPassword;
-        if(email && pass ){
+        let PortalVtigerRecord = this.state.PortalVtigerRecord;
+        if(email && pass && PortalVtigerRecord ){
             var describe_module = await describeModule(email,pass,this.state.PortalVtigerModule) ;
             this.setStateME({ 'PortalVtigerDescribeModule': describe_module});
             
@@ -106,13 +113,13 @@ class Add extends ValidationComponent {
                 {Object.entries(describe_module['describe']['fields']).map(async (fields ) => {
                     let field = fields[1];
                     if (field.name !== 'contact_id' && field.name !== 'parent_id' && field.name !== 'assigned_user_id' && field.name !== 'related_to' && field.editable ) {
-
+                        field.default = PortalVtigerRecord[field.name]?PortalVtigerRecord[field.name]:'';
                         if (field.type.name == 'string' ||  field.type.name == 'phone' || field.type.name == 'skype' || field.type.name == 'url' || field.type.name === "text"
                         || field.type.name == 'email' || field.type.name == 'integer' || field.type.name == 'double' || field.type.name == 'currency') {
                             data[ field.name ] = field.default;
                             this.setStateME({  [field.name]: field.default});
                         }else if (field.type.name == 'boolean') {
-                            if (field.default == "on") {
+                            if (field.default == "on" || field.default == true || field.default == 'true') {
                                 data[ field.name ] = true;
                                 this.setStateME({  [field.name]: true});
                             } else {
@@ -135,8 +142,9 @@ class Add extends ValidationComponent {
                                 data[ field.name ] = formatDate(date);
                                 this.setStateME({  [field.name]: date});
                             } else {
-                                data[ field.name ] = formatDate(field.default);
-                                this.setStateME({  [field.name]: field.default});
+                                var date = new Date(field.default);
+                                data[ field.name ] = formatDate(date);
+                                this.setStateME({  [field.name]: date});
                             }
                             dateField [field.name] = false;
                         }else if (field.type.name == 'multipicklist') {
@@ -182,8 +190,8 @@ class Add extends ValidationComponent {
                                 refersTo[ field.name ] = await fetchReferenceRecords(email,pass,module_name,"") ;
                             }
                             
-                            data[ field.name ] = field.default;
-                            this.setStateME({  [field.name]: field.default});
+                            data[ field.name ] = field.default.value?field.default.value:'';
+                            this.setStateME({  [field.name]: data[ field.name ]});
 
                         }else {
                             data[ field.name ] = field.default;
@@ -262,11 +270,11 @@ class Add extends ValidationComponent {
         return (
             <ScrollView style = {styles.Modal} nestedScrollEnabled={true}>
                 <Text style = {styles.HeaderText}>
-                    {vtranslate('Add New Ticket')}
+                    {vtranslate('Edit Ticket')} - {this.state.PortalVtigerRecord.ticket_title}
                 </Text>
                 
                 <Divider style = {styles.Divider} /> 
-                {(describeModule['describe'] && describeModule['describe']['fields'])?
+                {(describeModule['describe'] && describeModule['describe']['fields'] && this.state.PortalVtigerRecord.id)?
                         <View style={styles.mainBody}>
                                     
                                     <View>
@@ -462,7 +470,7 @@ class Add extends ValidationComponent {
     }
 }
 
-export default Add
+export default Edit
 
 const styles = StyleSheet.create({
     Modal:{

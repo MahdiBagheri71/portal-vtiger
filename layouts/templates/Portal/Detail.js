@@ -1,15 +1,13 @@
 import  { Component } from 'react'
-import {View, Text ,StyleSheet,Modal } from 'react-native'
+import {View, Text ,StyleSheet } from 'react-native'
 import { BottomNavigation,ActivityIndicator,Button } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {updateLang,vtranslate,fetchRelatedModules,fetchRecord,saveRecord,fetchModules} from '../../../Functions/Portal' ;
+import {updateLang,vtranslate,fetchRelatedModules,fetchRecord,saveRecord,describeModule} from '../../../Functions/Portal' ;
 
 import DetailPartials  from './partials/Detail'
 import ModCommentsPartials  from './partials/ModComments'
 import HistoryPartials  from './partials/History'
 import DocumentsPartials  from './partials/Documents'
-
-import HelpDeskEdit from './Edit'
 
 
 class Detail extends Component {
@@ -19,12 +17,11 @@ class Detail extends Component {
         record_id : 'false',
         partials : 'details',
         index : 0 ,
-        module : 'HelpDesk',
+        module : '',
         routes : [
             { key: 'details', title: vtranslate('Details'), icon: 'details' }
         ],
-        fetch_modules : {},
-        show_help_desk_add : false,
+        describeModule : {} ,
         record : {}
     }
 
@@ -46,6 +43,12 @@ class Detail extends Component {
         await AsyncStorage.getItem('password').then((value) => {
             if(value){
                 this.setState({ 'password': value })
+            }
+        })
+        
+        await AsyncStorage.getItem('module').then((value) => {
+            if(value){
+                this.setState({ 'module': value })
             }
         })
 
@@ -72,30 +75,13 @@ class Detail extends Component {
             }
             this.setState({ 'routes': route });
 
-            await AsyncStorage.getItem('fetch_modules').then(async(value) => {
-                var fetch_modules ='';
-                try{
-                    if(value){
-                        fetch_modules = JSON.parse(value);
-                        this.setState({ 'fetch_modules': fetch_modules });
-                    }
-                }catch(error){
-                    fetch_modules ='';
-                }
+            var describ = await describeModule(email,pass,this.state.module);
+            
+            if(describ['describe']){
 
-                if(fetch_modules == ''){
-                     fetch_modules = await fetchModules(email,pass);
-                     if(fetch_modules){
-                        AsyncStorage.setItem('fetch_modules', JSON.stringify(fetch_modules));
-                        
-                        AsyncStorage.setItem('email', email);
-                        AsyncStorage.setItem('password', pass);
-                        AsyncStorage.setItem('loginView', "false");
-                        this.setState({ fetch_modules: fetch_modules });
-                     }
-                }
+                this.setState({ 'describeModule': describ['describe']});
+            }
 
-            })
             this.setState({ 'record': await fetchRecord(email,pass,record_id,this.state.module,'')});
         }
     }
@@ -142,22 +128,6 @@ class Detail extends Component {
         this.setState({ 'partials': 'details' });
     }
 
-    edit = () =>{
-        AsyncStorage.setItem('record_loading', JSON.stringify(this.state.record['record']));
-        this.setState({ 'show_help_desk_add' : true });
-    }
-
-    loadAddModal = async() => {
-        this.setState({ 'show_help_desk_add' : false });
-        this.setState({ 'partials': 'null' });
-        this.setState({ 'index': 0 });
-        this.setState({ 'partials': 'details' });
-        let email =this.state.email
-        let pass = this.state.password;
-        let record_id = this.state.record_id;
-        this.setState({ 'record': await fetchRecord(email,pass,record_id,this.state.module,'')});
-    }
-
     render() {
         if(this.state.record_id.includes("x")){
             return (
@@ -165,25 +135,9 @@ class Detail extends Component {
                     
                     <View style={styles.navbar}>
                         <Button style={styles.moduleTitle} mode="text" color="#428bca" onPress={() => this.loadList()}>
-                            {this.state.fetch_modules['modules'] ? this.state.fetch_modules['modules']['information'][this.state.module].uiLabel:null}
-                            {(this.state.record['record'] && this.state.record['record'].ticket_title)?' ('+this.state.record['record'].ticket_title+') ':null}
+                            {this.state.describeModule.label}
+                            {(this.state.record['record'] && this.state.describeModule.labelFields && this.state.record['record'][this.state.describeModule.labelFields])?' ('+this.state.record['record'][this.state.describeModule.labelFields]+') ':null}
                         </Button>
-                        {(this.state.record['record'] && this.state.record['record'].ticketstatus != 'Closed')?
-                            <Button style={styles.btnSuccess} color="#fff" onPress={() => this.markClosed()}>
-                                {vtranslate('Mark as closed')}
-                            </Button>
-                        :null}
-                        {(this.state.fetch_modules['modules'] && this.state.record['record'] && this.state.fetch_modules['modules']['information'][this.state.module] &&  this.state.fetch_modules['modules']['information'][this.state.module].edit) ?
-                            <Button style={styles.btnPrimary} color="#fff" onPress={() => this.edit()}>
-                                {vtranslate('Edit Ticket')}
-                            </Button>
-                        :null}
-                        <View>
-                            <Modal animationType = {"slide"} transparent = {false}
-                                visible = {this.state.show_help_desk_add}>
-                                    <HelpDeskEdit investmentHandler={this.loadAddModal}/>
-                            </Modal>
-                        </View>
                     </View>
 
                     <BottomNavigation 
@@ -215,46 +169,16 @@ export default Detail
 const styles = StyleSheet.create({
     BottomNavigation : {
         top : 0,
-        margin : 2 ,
-        marginTop : 50
+        margin : 2 
     } ,
     navbar : {
         width: "100%" ,
     },
     moduleTitle : {
-        position: 'absolute',
+        width: "100%" ,
         padding : 3 ,
         textAlign : 'center',
-        width : '33%',
         flex : 1,
         fontSize : 18 ,
-        top : 0,
-        right : '33.33%'
     },
-    btnPrimary:{
-        position: 'absolute',
-        borderRadius : 5,
-        textAlign : 'center',
-        flex : 1,
-        width : '30%',
-        backgroundColor : '#3276b1',
-        padding : 1,
-        borderWidth :1 ,
-        borderColor : '#285e8e',
-        top : 0,
-        left : '1%'
-    },
-    btnSuccess : {
-        position: 'absolute',
-        borderRadius : 5,
-        flex : 1,
-        textAlign : 'center',
-        width : '30%',
-        backgroundColor : '#47a447',
-        padding : 1,
-        borderWidth :1 ,
-        borderColor : '#398439',
-        top : 0,
-        right : '1%'
-    }
 })

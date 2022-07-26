@@ -9,6 +9,7 @@ import { Appbar } from 'react-native-paper';
 import Home from './Portal/Home.js'
 import HelpDesk from './HelpDesk/Index'
 import Login from './Portal/Login.js'
+import IndexPortal from './Portal/Index'
 import Footer from './Footer.js'
 
 import { Button, Divider, Provider } from 'react-native-paper';
@@ -133,14 +134,17 @@ class Header extends Component {
       this.setState({ visible: false })
    }
 
-   setModule = (module) => {
-      this.setState({ module: module })
+   setModule = async(module) => {      
       
-      AsyncStorage.setItem('module', module);
+      this.setState({ module: 'null' });
+      
+      await AsyncStorage.setItem('module', module);
       
       this.setState({ visible: false });
       
-      AsyncStorage.setItem('record_id', 'false');
+      await AsyncStorage.setItem('record_id', 'false');
+
+      this.setState({ module: module });
    }
 
    
@@ -208,14 +212,19 @@ class Header extends Component {
    }
    
    loadPage = (module) =>{
+      // return <Text> {module}</Text>;
       
       switch(module) {
          case 'HelpDesk':
-           return <HelpDesk investmentHandler={this.loadModule}/>;
+            return <HelpDesk investmentHandler={this.loadModule}/>;
          case 'Documents':
-             return <Text> Documents</Text>;
+            return <Text> Documents</Text>;
+         case 'Home':
+            return <Home investmentHandler={this.loadModule}/>;
+         case 'null':
+               return null;
          default:
-           return <Home investmentHandler={this.loadModule}/>;
+           return <IndexPortal investmentHandler={this.loadModule}/>;
       }
    }
 
