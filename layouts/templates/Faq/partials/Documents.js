@@ -55,7 +55,7 @@ class Documents extends Component {
         try {
             const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
             if (!permissions.granted) {
-                alert("Not Permissions");
+                alert(vtranslate("Not Permissions"));
                 return;
             }
     
@@ -85,7 +85,7 @@ class Documents extends Component {
         if(file && file.filecontents){
             this.downloadFileMe(file.filecontents,file.filename,file.filetype);
         }else{
-            alert("No file!")
+            alert(vtranslate("No file!"))
         }
 	}
 

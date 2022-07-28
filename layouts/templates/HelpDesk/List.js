@@ -9,7 +9,7 @@ import { DataTable,Appbar,FAB,Button,ActivityIndicator  } from 'react-native-pap
 
 import HelpDeskAdd from './Add'
 
-import {per_page} from '../../../global.js' 
+import {per_page,coun_header} from '../../../global.js' 
 
 class List extends Component {
     state = {
@@ -21,7 +21,7 @@ class List extends Component {
         mode : 'mine' ,
         show_help_desk_add : false,
         describeModule : {} ,
-        counShowHeader : 5 ,
+        counShowHeader : coun_header ,
         perPage : per_page ,
         ticketstatus : 'ALL',
         page : 0,

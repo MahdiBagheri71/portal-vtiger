@@ -137,7 +137,9 @@
   "Yes" : "بلی",
   "No" : "خیر",
   "Details" : "جزییات",
-  "Downloaded Successfully" : "دانلود با موفقیت انجام شد"
+  "Downloaded Successfully" : "دانلود با موفقیت انجام شد",
+  "Not Permissions" : "شما دسترسی به فایل منیجر ندارید",
+  "No file!" : "فایل مورد نظر وجود ندارد!"
   
 }
   

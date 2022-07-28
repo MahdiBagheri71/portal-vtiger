@@ -9,6 +9,7 @@ import { Appbar } from 'react-native-paper';
 import Home from './Portal/Home.js'
 import HelpDesk from './HelpDesk/Index'
 import Faq from './Faq/List'
+import Documents from './Documents/Index'
 import Login from './Portal/Login.js'
 import IndexPortal from './Portal/Index'
 import Footer from './Footer.js'
@@ -221,7 +222,7 @@ class Header extends Component {
             case 'Faq':
                return <Faq investmentHandler={this.loadModule}/>;
          case 'Documents':
-            return <Text> Documents</Text>;
+            return <Documents investmentHandler={this.loadModule}/>;
          case 'Home':
             return <Home investmentHandler={this.loadModule}/>;
          case 'null':

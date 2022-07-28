@@ -1,11 +1,14 @@
 import  { Component } from 'react'
-import {View, Text, StyleSheet ,ScrollView ,Dimensions} from 'react-native'
-import {updateLang,vtranslate,fetchRecords,describeModule} from '../../../Functions/Portal' ;
+import {View, Text, StyleSheet ,ScrollView ,Dimensions,Modal} from 'react-native'
+import {updateLang,vtranslate,fetchRecords,describeModule,downloadFile} from '../../../Functions/Portal' ;
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system';
+const { StorageAccessFramework } = FileSystem;
 
-import { DataTable,Appbar,Button,ActivityIndicator  } from 'react-native-paper';
+import { DataTable,Appbar,FAB,Button,ActivityIndicator  } from 'react-native-paper';
 
 import {per_page,coun_header} from '../../../global.js' 
+import DocumentsAdd from './Add.js'
 
 class List extends Component {
     state = {
@@ -15,7 +18,7 @@ class List extends Component {
         fetch_modules : {},
         heightHome : Dimensions.get('window').height-158,
         mode : 'mine' ,
-        show_help_desk_add : false,
+        show_help_documents_add : false,
         describeModule : {} ,
         counShowHeader : coun_header ,
         perPage : per_page ,
@@ -121,7 +124,7 @@ class List extends Component {
     }
 
     loadAddModal = () => {
-        this.setState({ 'show_help_desk_add' : false });
+        this.setState({ 'show_help_documents_add' : false });
         AsyncStorage.getItem('record_id').then((value) => {
             if(value.includes("x")){
                 this.props.investmentHandler();
@@ -146,6 +149,44 @@ class List extends Component {
         this.setState({ 'order_by' : field });
         this.fetchRecordsMe();
     }
+    
+    downloadFileMe = async (fileString, fileName ,fileType) => {
+        try {
+            const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+            if (!permissions.granted) {
+                alert(vtranslate("Not Permissions"));
+                return;
+            }
+    
+            try {
+                await StorageAccessFramework.createFileAsync(permissions.directoryUri, fileName, fileType)
+                .then(async (uri) => {
+                    await FileSystem.writeAsStringAsync(uri, fileString, { encoding: FileSystem.EncodingType.Base64 });
+                    alert(vtranslate('Downloaded Successfully'));
+                })
+                .catch((e) => {
+                    alert(e)
+                });
+            } catch (e) {
+                alert(e)
+                throw new Error(e);
+            }
+        
+        } catch (err) {
+            alert(err)
+        }
+    }
+
+    downloadDocumentFile = async(id) => {
+        let email =this.state.email
+        let pass = this.state.password;
+        var  file = await downloadFile(email,pass,'Documents', id, 0, 0, '');
+        if(file && file.filecontents){
+            this.downloadFileMe(file.filecontents,file.filename,file.filetype);
+        }else{
+            alert(vtranslate("No file!"))
+        }
+	}
 
     render() {
         if(this.state.fetchRecords.hasOwnProperty('count')){
@@ -180,6 +221,7 @@ class List extends Component {
                                         }
                                         return null;
                                     })):null}
+                                    <DataTable.Title>{vtranslate("Actions")}</DataTable.Title>
                                 </DataTable.Header>
                                 
                                 { (Object.entries(this.state.fetchRecords).sort((a, b) => Number(a[0]) > Number(b[0]) ? 1 : -1).map((record ) => {
@@ -220,10 +262,16 @@ class List extends Component {
                                                     }
                                                     return null;
                                                 }))}
+                                                <DataTable.Cell>
+                                                    <Button icon="tray-arrow-down" style={styles.attachment}  mode="contained" color="#428bca" onPress={() => this.downloadDocumentFile(record[1]['id'])}>
+                                                        {vtranslate('Download')}
+                                                    </Button>
+                                                </DataTable.Cell>
                                             </DataTable.Row>
                                         );
                                     }
                                 }))}
+                                
                                 {this.state.fetchRecords['count'] > 0 ?
                                     <DataTable.Pagination
                                         style={styles.DataTableHeader}
@@ -238,6 +286,21 @@ class List extends Component {
                             </DataTable>
                         </ScrollView>
                     </View> 
+                     
+                    <View>
+                        <Modal animationType = {"slide"} transparent = {false}
+                            visible = {this.state.show_help_documents_add}>
+                                <DocumentsAdd investmentHandler={this.loadAddModal}/>
+                        </Modal>
+                    </View>
+                    <FAB
+                        style={styles.fab}
+                        small
+                        icon="plus"
+                        onPress={async() => {
+                            await AsyncStorage.setItem('parentIdDocuments', '');
+                            this.setState({ 'show_help_documents_add' : true });}}
+                        />
                 </ScrollView> 
             )
         }else{
