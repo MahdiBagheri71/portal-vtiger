@@ -1,12 +1,10 @@
 import  { Component } from 'react'
-import {View, Text,Dimensions,StyleSheet,Modal } from 'react-native'
+import {View, Text,StyleSheet} from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator,Button } from 'react-native-paper';
-import {updateLang,vtranslate,fetchRelatedRecords,downloadFile,fetchRecord} from '../../../../Functions/Portal' ;
+import {updateLang,vtranslate,fetchRelatedRecords,downloadFile} from '../../../../Functions/Portal' ;
 import * as FileSystem from 'expo-file-system';
 const { StorageAccessFramework } = FileSystem;
-
-import DocumentsAdd from './../../Documents/Add.js'
 
 class Documents extends Component {
     state = {
@@ -14,11 +12,10 @@ class Documents extends Component {
         password : '',
         record_id : 'false',
         documents : false ,
-        module : 'HelpDesk',
+        module : 'Faq',
         relatedModule : 'Documents',
         commentcontent : '',
-        show_documens_add : false,
-        record : {}
+        show_documens_add : false
     }
 
     componentDidMount = async () => {
@@ -28,7 +25,7 @@ class Documents extends Component {
                 this.setState({ 'lang': value })
             }
         })
-        await AsyncStorage.getItem('record_id').then((value) => {
+        await AsyncStorage.getItem('record_id_faq').then((value) => {
             this.setState({ 'record_id': value })
         })
         await AsyncStorage.getItem('email').then((value) => {
@@ -47,7 +44,6 @@ class Documents extends Component {
         let record_id = this.state.record_id;
         if(email && pass && record_id){
             this.setState({ 'documents': await fetchRelatedRecords(email,pass,this.state.relatedModule,this.state.relatedModule,record_id,0, 0,50,this.state.module)});
-            this.setState({ 'record': await fetchRecord(email,pass,record_id,this.state.module,'')});
         }
     }
 
@@ -113,18 +109,6 @@ class Documents extends Component {
         if(this.state.documents){
             return (
                 <View style={styles.documentsContent}>
-                    {(this.state.record['record'] && this.state.record['record'].ticketstatus != 'Closed')?
-                        <View>
-                            <Button style = {styles.TextStatusSave} color={"#fff"} onPress={() => this.loadAddModule()}>
-                                <Text style = {styles.submitButtonText}>{  vtranslate("Attach document to this ticket")}</Text>
-                            </Button>
-                            
-                            <Modal animationType = {"slide"} transparent = {false}
-                                visible = {this.state.show_documens_add}>
-                                    <DocumentsAdd investmentHandler={this.loadAddModal}/>
-                            </Modal>
-                        </View>
-                    :null}
                     {this.state.documents.map((document ,key) => {
                         return(
                             <View style={styles.documentsRecord} key={key}>
@@ -151,7 +135,7 @@ class Documents extends Component {
             )
         }else{
             return (
-                <View style ={{width: Dimensions.get('window').width ,textAlign:'center',padding : 25}}>
+                <View style ={{width: "100%" ,textAlign:'center',padding : 25}}>
                     <Text style ={{textAlign:'center',padding : 25}}>{vtranslate("Loading")}</Text>
                     <ActivityIndicator style ={{textAlign:'center',padding : 25}} animating={true} color='#000' />
                 </View> 
@@ -164,7 +148,7 @@ export default Documents
 
 const styles = StyleSheet.create({
     documentsContent : {
-        width: Dimensions.get('window').width-20 ,
+        width: "100%" ,
         padding : 3 ,
         borderBottomWidth : 1 ,
         borderColor : '#eee',
@@ -175,7 +159,6 @@ const styles = StyleSheet.create({
         margin : 10
     },
     documentsBullet:{
-        width: Dimensions.get('window').width-45 ,
         backgroundColor : '#428bca',
         padding : 3,
         marginBottom : 8
@@ -191,17 +174,4 @@ const styles = StyleSheet.create({
     attachment : {
         fontSize : 12
     },
-    TextStatusSave:{
-        backgroundColor :'#5cb85c',
-        borderRadius : 5,
-        textAlign : 'center',
-        width : 'auto',
-        color : '#fff',
-        padding : 5,
-        margin : 5,
-        marginLeft : 25
-    },
-    submitButtonText : {
-        color : "#fff"
-    }
 })

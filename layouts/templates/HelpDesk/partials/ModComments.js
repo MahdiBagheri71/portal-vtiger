@@ -48,13 +48,7 @@ class ModComments extends Component {
             this.setState({ 'record': await fetchRecord(email,pass,record_id,this.state.module,'')});
         }
     }
-
-    loadRecord = () => {
-        AsyncStorage.getItem('record_id').then((value) => {
-            this.setState({ 'record_id': value })
-        });
-    }
-
+    
     componentWillUnmount() {
         this._isMounted = false;
     }

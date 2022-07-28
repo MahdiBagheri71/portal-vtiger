@@ -1,6 +1,6 @@
 import  { Component } from 'react'
 import {View, Text, StyleSheet ,ScrollView ,Dimensions,Modal} from 'react-native'
-import {fetchCompanyTitle,updateLang,vtranslate,fetchRecords,describeModule} from '../../../Functions/Portal' ;
+import {updateLang,vtranslate,fetchRecords,describeModule} from '../../../Functions/Portal' ;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Dropdown  } from 'react-native-element-dropdown';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -9,13 +9,12 @@ import { DataTable,Appbar,FAB,Button,ActivityIndicator  } from 'react-native-pap
 
 import HelpDeskAdd from './Add'
 
-import '../../../global.js' 
+import {per_page} from '../../../global.js' 
 
 class List extends Component {
     state = {
         email : '',
         password : '',
-        company_detail : {},
         fetchRecords : {},
         fetch_modules : {},
         heightHome : Dimensions.get('window').height-158,
@@ -23,7 +22,7 @@ class List extends Component {
         show_help_desk_add : false,
         describeModule : {} ,
         counShowHeader : 5 ,
-        perPage : 7 ,
+        perPage : per_page ,
         ticketstatus : 'ALL',
         page : 0,
         module : 'HelpDesk',
@@ -59,24 +58,6 @@ class List extends Component {
         let email =this.state.email
         let pass = this.state.password;
         if(email && pass ){
-            await AsyncStorage.getItem('company_detail').then(async(value) => {
-                var company_detail ='';
-                try{
-                    if(value){
-                        company_detail = JSON.parse(value);
-                        this.setState({ 'company_detail': company_detail });
-                    }
-                }catch(error){
-                        company_detail ='';
-                }
-                if(company_detail == ''){
-                    company_detail = await fetchCompanyTitle(email,pass);
-                    if(company_detail){
-                        AsyncStorage.setItem('company_detail', JSON.stringify(company_detail));
-                        this.setState({ company_detail: company_detail });
-                    }
-                }
-            });
 
             await AsyncStorage.getItem('fetch_modules').then(async(value) => {
                 var fetch_modules ='';

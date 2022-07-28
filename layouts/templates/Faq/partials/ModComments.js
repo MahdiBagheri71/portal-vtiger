@@ -1,5 +1,5 @@
 import  { Component } from 'react'
-import {View, Text,Dimensions,StyleSheet,TextInput } from 'react-native'
+import {View, Text,StyleSheet,TextInput } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator,Button } from 'react-native-paper';
 import {updateLang,vtranslate,fetchRelatedRecords,downloadFile,addComment} from '../../../../Functions/Portal' ;
@@ -12,7 +12,7 @@ class ModComments extends Component {
         password : '',
         record_id : 'false',
         comments : false ,
-        module : '',
+        module : 'Faq',
         relatedModule : 'ModComments',
         commentcontent : '',
         disableButton : false
@@ -25,7 +25,7 @@ class ModComments extends Component {
                 this.setState({ 'lang': value })
             }
         })
-        await AsyncStorage.getItem('record_id').then((value) => {
+        await AsyncStorage.getItem('record_id_faq').then((value) => {
             this.setState({ 'record_id': value })
         })
         await AsyncStorage.getItem('email').then((value) => {
@@ -36,12 +36,6 @@ class ModComments extends Component {
         await AsyncStorage.getItem('password').then((value) => {
             if(value){
                 this.setState({ 'password': value })
-            }
-        })
-        
-        await AsyncStorage.getItem('module').then((value) => {
-            if(value){
-                this.setState({ 'module': value })
             }
         })
 
@@ -116,7 +110,7 @@ class ModComments extends Component {
         if(this.state.comments){
             return (
                 <View style={styles.commentContent}>
-                    <View>
+                    <View style={styles.commentContent}>
                         <TextInput multiline={true} style = {styles.inputTextArea} placeholder={vtranslate('Add your comment here')} onChangeText={(val) => this.setState({commentcontent : val})} value={this.state.commentcontent}/>
                         <Button style = {styles.TextStatusSave} color={"#fff"} onPress={() => this.sendComment()}>
                             <Text style = {styles.submitButtonText}>{ this.state.disableButton ? vtranslate("Loading"): vtranslate("Submit")}</Text>
@@ -157,7 +151,7 @@ class ModComments extends Component {
             )
         }else{
             return (
-                <View style ={{width: Dimensions.get('window').width ,textAlign:'center',padding : 25}}>
+                <View style ={{width: "100%" ,textAlign:'center',padding : 25}}>
                     <Text style ={{textAlign:'center',padding : 25}}>{vtranslate("Loading")}</Text>
                     <ActivityIndicator style ={{textAlign:'center',padding : 25}} animating={true} color='#000' />
                 </View> 
@@ -170,7 +164,8 @@ export default ModComments
 
 const styles = StyleSheet.create({
     commentContent : {
-        width: Dimensions.get('window').width-20 ,
+        textAlign : 'center',
+        width: "100%" ,
         padding : 3 ,
         borderBottomWidth : 1 ,
         borderColor : '#eee',
@@ -181,7 +176,6 @@ const styles = StyleSheet.create({
         margin : 10
     },
     commentBullet:{
-        width: Dimensions.get('window').width-45 ,
         backgroundColor : '#428bca',
         padding : 3,
         marginBottom : 8
@@ -202,21 +196,18 @@ const styles = StyleSheet.create({
         fontSize : 12
     },
     inputTextArea:{
-        width: Dimensions.get('window').width-45 ,
-        margin: 20,
+        width: "90%" ,
         borderColor: '#ccc',
         borderWidth: 1,
+        marginBottom : 25,
         padding : 10
     },
     TextStatusSave:{
+        width: "90%" ,
         backgroundColor :'#5cb85c',
         borderRadius : 5,
-        textAlign : 'center',
-        width : 'auto',
         color : '#fff',
-        padding : 5,
-        margin : 5,
-        marginLeft : 25
+        marginBottom : 25,
     },
     submitButtonText : {
         color : "#fff"

@@ -217,12 +217,6 @@ class History extends Component {
         }
     }
 
-    loadRecord = () => {
-        AsyncStorage.getItem('record_id').then((value) => {
-            this.setState({ 'record_id': value })
-        });
-     }
-
     render() {
         if(this.state.history.hasOwnProperty('count')){
             return (

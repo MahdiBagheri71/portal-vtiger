@@ -8,6 +8,7 @@ import { Appbar } from 'react-native-paper';
 
 import Home from './Portal/Home.js'
 import HelpDesk from './HelpDesk/Index'
+import Faq from './Faq/List'
 import Login from './Portal/Login.js'
 import IndexPortal from './Portal/Index'
 import Footer from './Footer.js'
@@ -19,7 +20,7 @@ class Header extends Component {
       email: '',
       password: '',
       lang: 'en_us',
-      module: 'Home',
+      module: 'null',
       fetch_modules:{},
       company_detail :{},
       modules_header:{},
@@ -217,6 +218,8 @@ class Header extends Component {
       switch(module) {
          case 'HelpDesk':
             return <HelpDesk investmentHandler={this.loadModule}/>;
+            case 'Faq':
+               return <Faq investmentHandler={this.loadModule}/>;
          case 'Documents':
             return <Text> Documents</Text>;
          case 'Home':
@@ -285,7 +288,7 @@ class Header extends Component {
                <Footer/>
             </View>
          )
-      }else{
+      }else if(this.state.loginView == 'true'){
          return (
             <View>
                <Appbar.Header style = {styles.container}>
@@ -303,6 +306,8 @@ class Header extends Component {
             </View>
                
          )
+      }else{
+         return null;
       }
    }
 }

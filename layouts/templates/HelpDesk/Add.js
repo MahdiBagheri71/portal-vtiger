@@ -135,8 +135,9 @@ class Add extends ValidationComponent {
                                 data[ field.name ] = formatDate(date);
                                 this.setStateME({  [field.name]: date});
                             } else {
-                                data[ field.name ] = formatDate(field.default);
-                                this.setStateME({  [field.name]: field.default});
+                                var date = new Date(field.default);
+                                data[ field.name ] = formatDate(date);
+                                this.setStateME({  [field.name]: date});
                             }
                             dateField [field.name] = false;
                         }else if (field.type.name == 'multipicklist') {

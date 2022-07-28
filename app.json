@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "PortalVtiger",
+    "name": "Portal Vtiger",
     "slug": "PortalVtiger",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/favicon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/favicon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -20,15 +20,14 @@
     "ios": {
       "supportsTablet": true,
       "usesIcloudStorage": true,
-      "bundleIdentifier": "PortalVtiger"
+      "bundleIdentifier": "Portal Vtiger"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/favicon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "useNextNotificationsApi": true,
-      "package": "PortalVtiger"
+      "package": "Portal Vtiger"
     },
     "web": {
       "favicon": "./assets/favicon.png"
