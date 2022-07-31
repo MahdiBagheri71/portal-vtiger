@@ -9,7 +9,6 @@ class Detail extends Component {
         email : '',
         password : '',
         record_id : 'false',
-        parent_id : '',
         describeModule : {} ,
         record : false ,
         module : '',
@@ -37,13 +36,6 @@ class Detail extends Component {
             }
         })
         
-        await AsyncStorage.getItem('parent_id').then((value) => {
-            if(value){
-                this.setState({ 'parent_id': value })
-            }else{
-                this.setState({ 'parent_id': '' })
-            }
-        })
         await AsyncStorage.getItem('module').then((value) => {
             if(value){
                 this.setState({ 'module': value })
@@ -65,8 +57,7 @@ class Detail extends Component {
 
                 this.setState({ 'describeModule': fields});
             }
-            
-            this.setState({ 'record': await fetchRecord(email,pass,record_id,this.state.module,this.state.parent_id)});
+            this.setState({ 'record': await fetchRecord(email,pass,record_id,this.state.module,'')});
         }
     }
 

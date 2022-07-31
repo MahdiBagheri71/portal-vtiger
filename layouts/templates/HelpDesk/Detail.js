@@ -127,6 +127,7 @@ class Detail extends Component {
 
     loadList = () => {
         AsyncStorage.setItem('record_id', 'false');
+        AsyncStorage.setItem('parent_id', '');
         this.props.investmentHandler();
     }
 
@@ -136,10 +137,13 @@ class Detail extends Component {
         let record_id = this.state.record_id;
         var data =JSON.stringify({"ticketstatus":"Closed"});
         var result = await saveRecord(email,pass,this.state.module,data,record_id);
-        this.setState({ 'record': result});
-        this.setState({ 'partials': 'null' });
-        this.setState({ 'index': 0 });
-        this.setState({ 'partials': 'details' });
+        
+        if(result){
+            this.setState({ 'record': result});
+            this.setState({ 'partials': 'null' });
+            this.setState({ 'index': 0 });
+            this.setState({ 'partials': 'details' });
+        }
     }
 
     edit = () =>{
@@ -173,7 +177,7 @@ class Detail extends Component {
                                 {vtranslate('Mark as closed')}
                             </Button>
                         :null}
-                        {(this.state.fetch_modules['modules'] && this.state.record['record'] && this.state.fetch_modules['modules']['information'][this.state.module] &&  this.state.fetch_modules['modules']['information'][this.state.module].edit) ?
+                        {(this.state.fetch_modules['modules'] && this.state.record['record'] && this.state.fetch_modules['modules']['information'][this.state.module] &&  this.state.fetch_modules['modules']['information'][this.state.module].edit=='1') ?
                             <Button style={styles.btnPrimary} color="#fff" onPress={() => this.edit()}>
                                 {vtranslate('Edit Ticket')}
                             </Button>

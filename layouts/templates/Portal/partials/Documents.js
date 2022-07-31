@@ -15,8 +15,8 @@ class Documents extends Component {
         record_id : 'false',
         documents : false ,
         module : '',
+        parent_id : '',
         relatedModule : 'Documents',
-        commentcontent : '',
         show_documens_add : false
     }
 
@@ -35,6 +35,14 @@ class Documents extends Component {
                 this.setState({ 'email': value })
             }
         })
+        
+        await AsyncStorage.getItem('parent_id').then((value) => {
+            if(value){
+                this.setState({ 'parent_id': value })
+            }else{
+                this.setState({ 'parent_id': '' })
+            }
+        })
         await AsyncStorage.getItem('password').then((value) => {
             if(value){
                 this.setState({ 'password': value })
@@ -51,7 +59,7 @@ class Documents extends Component {
         let pass = this.state.password;
         let record_id = this.state.record_id;
         if(email && pass && record_id){
-            this.setState({ 'documents': await fetchRelatedRecords(email,pass,this.state.relatedModule,this.state.relatedModule,record_id,0, 0,50,this.state.module)});
+            this.setState({ 'documents': await fetchRelatedRecords(email,pass,this.state.relatedModule,this.state.relatedModule,record_id,this.state.parent_id, 0,50,this.state.module)});
         }
     }
 
@@ -102,7 +110,7 @@ class Documents extends Component {
         let pass = this.state.password;
         let record_id = this.state.record_id;
         if(email && pass && record_id){
-            this.setState({ 'documents': await fetchRelatedRecords(email,pass,this.state.relatedModule,this.state.relatedModule,record_id,0, 0,50,this.state.module)});
+            this.setState({ 'documents': await fetchRelatedRecords(email,pass,this.state.relatedModule,this.state.relatedModule,record_id,this.state.parent_id, 0,50,this.state.module)});
         }
         this.setState({ show_documens_add : false });
     }

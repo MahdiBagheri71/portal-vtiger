@@ -16,7 +16,6 @@ class Documents extends Component {
         documents : false ,
         module : 'HelpDesk',
         relatedModule : 'Documents',
-        commentcontent : '',
         show_documens_add : false,
         record : {}
     }

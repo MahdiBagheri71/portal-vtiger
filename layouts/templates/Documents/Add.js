@@ -74,6 +74,7 @@ class Add extends Component {
                 if(!this.state.parentId){
                     if(result['result']["record"] && result['result']["record"]['id']){
                         AsyncStorage.setItem('record_id', result['result']["record"]['id']);
+                        AsyncStorage.setItem('parent_id', '');
                     }
                     AsyncStorage.setItem('module', "Documents");
                 }

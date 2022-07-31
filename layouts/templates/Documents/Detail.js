@@ -119,6 +119,7 @@ class Detail extends Component {
 
     loadList = () => {
         AsyncStorage.setItem('record_id', 'false');
+        AsyncStorage.setItem('parent_id', '');
         this.props.investmentHandler();
     }
 

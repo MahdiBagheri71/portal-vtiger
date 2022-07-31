@@ -150,6 +150,7 @@ class List extends Component {
 
     setModuleID = (record_id) => {
         AsyncStorage.setItem('record_id', record_id);
+        AsyncStorage.setItem('parent_id', '');
         this.props.investmentHandler();
     }
 

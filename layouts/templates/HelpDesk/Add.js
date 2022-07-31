@@ -63,6 +63,7 @@ class Add extends ValidationComponent {
             var result = await saveRecord(email,pass,this.state.PortalVtigerModule,data,false);
             if(result["record"] && result["record"]['id']){
                 AsyncStorage.setItem('record_id', result["record"]['id']);
+                AsyncStorage.setItem('parent_id', '');
             }
             AsyncStorage.setItem('module', this.state.PortalVtigerModule);
             this.props.investmentHandler();

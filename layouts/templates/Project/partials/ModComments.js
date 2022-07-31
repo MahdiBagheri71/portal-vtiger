@@ -15,7 +15,6 @@ class ModComments extends Component {
         module : '',
         relatedModule : 'ModComments',
         commentcontent : '',
-        parent_id : '',
         disableButton : false
     }
 
@@ -40,14 +39,6 @@ class ModComments extends Component {
             }
         })
         
-        await AsyncStorage.getItem('parent_id').then((value) => {
-            if(value){
-                this.setState({ 'parent_id': value })
-            }else{
-                this.setState({ 'parent_id': '' })
-            }
-        })
-        
         await AsyncStorage.getItem('module').then((value) => {
             if(value){
                 this.setState({ 'module': value })
@@ -58,7 +49,7 @@ class ModComments extends Component {
         let pass = this.state.password;
         let record_id = this.state.record_id;
         if(email && pass && record_id){
-            this.setState({ 'comments': await fetchRelatedRecords(email,pass,this.state.relatedModule,this.state.relatedModule,record_id,this.state.parent_id, 0,50,this.state.module)});
+            this.setState({ 'comments': await fetchRelatedRecords(email,pass,this.state.relatedModule,this.state.relatedModule,record_id,0, 0,50,this.state.module)});
         }
     }
 
@@ -108,11 +99,11 @@ class ModComments extends Component {
             let email =this.state.email
             let pass = this.state.password;
             let record_id = this.state.record_id;
-            var values = {"commentcontent":this.state.commentcontent,"parentId":'',"related_to":record_id}
-            var commen  = await addComment(email,pass,JSON.stringify(values), this.state.parent_id);
+            var values = {"commentcontent":this.state.commentcontent,"parentId":"","related_to":record_id}
+            var commen  = await addComment(email,pass,JSON.stringify(values), '');
             if(commen){
                 this.setState({"commentcontent":""});
-                this.setState({ 'comments': await fetchRelatedRecords(email,pass,this.state.relatedModule,this.state.relatedModule,record_id,this.state.parent_id, 0,50,this.state.module)});
+                this.setState({ 'comments': await fetchRelatedRecords(email,pass,this.state.relatedModule,this.state.relatedModule,record_id,0, 0,50,this.state.module)});
             }
             this.setState({'disableButton' : false});
         }else{

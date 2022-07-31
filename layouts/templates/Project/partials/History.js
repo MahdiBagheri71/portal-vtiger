@@ -13,7 +13,6 @@ class History extends Component {
         describeModule : {} ,
         history : false ,
         module : '',
-        parent_id: ''
     }
 
     componentWillUnmount() {
@@ -41,14 +40,6 @@ class History extends Component {
             }
         })
         
-        await AsyncStorage.getItem('parent_id').then((value) => {
-            if(value){
-                this.setState({ 'parent_id': value })
-            }else{
-                this.setState({ 'parent_id': '' })
-            }
-        })
-        
         await AsyncStorage.getItem('module').then((value) => {
             if(value){
                 this.setState({ 'module': value })
@@ -72,7 +63,7 @@ class History extends Component {
 
                 this.setState({ 'describeModule': fields});
             }
-            var result = await fetchHistory(email,pass,this.state.module,record_id,0, 50,this.state.parent_id);
+            var result = await fetchHistory(email,pass,this.state.module,record_id,0, 50,0);
             var history = {'records':[],'count':0};
             var new_array = {};
             let count = 0

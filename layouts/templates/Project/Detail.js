@@ -8,6 +8,9 @@ import DetailPartials  from './partials/Detail'
 import ModCommentsPartials  from './partials/ModComments'
 import HistoryPartials  from './partials/History'
 import DocumentsPartials  from './partials/Documents'
+import ProjectTaskPartials  from './partials/ProjectTask'
+import ProjectMilestonePartials  from './partials/ProjectMilestone'
+
 
 import Edit from './Edit'
 
@@ -16,7 +19,6 @@ class Detail extends Component {
         email : '',
         password : '',
         record_id : 'false',
-        parent_id : '',
         partials : 'details',
         index : 0 ,
         module : '',
@@ -39,13 +41,6 @@ class Detail extends Component {
         await AsyncStorage.getItem('record_id').then((value) => {
             this.setState({ 'record_id': value })
         })
-        await AsyncStorage.getItem('parent_id').then((value) => {
-            if(value){
-                this.setState({ 'parent_id': value })
-            }else{
-                this.setState({ 'parent_id': '' })
-            }
-        })
         await AsyncStorage.getItem('email').then((value) => {
             if(value){
                 this.setState({ 'email': value })
@@ -67,24 +62,6 @@ class Detail extends Component {
         let pass = this.state.password;
         let record_id = this.state.record_id;
         if(email && pass && record_id ){
-            var fetchRelatedModule = await fetchRelatedModules(email,pass,this.state.module);
-            var route = [{ key: 'details', title: vtranslate('Details'), icon: 'details' }];
-            if(fetchRelatedModule){
-                fetchRelatedModule.map((module)=>{
-                    switch (module.toLowerCase()) {
-                        case 'modcomments':
-                            route.push({ key: 'modComments', title: vtranslate('ModComments'), icon: 'comment'});
-                            break;
-                        case 'history':
-                            route.push({ key: 'history', title: vtranslate('History'), icon: 'history'});
-                            break;
-                        case 'documents':
-                            route.push({ key: 'documents', title: vtranslate('Documents'), icon: 'file-document'});
-                            break;
-                    }
-                })
-            }
-            this.setState({ 'routes': route });
 
             await AsyncStorage.getItem('fetch_modules').then(async(value) => {
                 var fetch_modules ='';
@@ -108,6 +85,35 @@ class Detail extends Component {
                         this.setState({ fetch_modules: fetch_modules });
                      }
                 }
+                
+                var fetchRelatedModule = await fetchRelatedModules(email,pass,this.state.module);
+                var route = [{ key: 'details', title: vtranslate('Details'), icon: 'details' }];
+                if(fetchRelatedModule && fetch_modules["modules"]){
+                    fetchRelatedModule.map((module)=>{
+                        switch (module.toLowerCase()) {
+                            case 'modcomments':
+                                route.push({ key: 'modComments', title: vtranslate('ModComments'), icon: 'comment'});
+                                break;
+                            case 'history':
+                                route.push({ key: 'history', title: vtranslate('History'), icon: 'history'});
+                                break;
+                            case 'documents':
+                                route.push({ key: 'documents', title: vtranslate('Documents'), icon: 'file-document'});
+                                break;
+                            case 'projecttask':
+                                if(fetch_modules["modules"]['information']['ProjectTask']){
+                                    route.push({ key: 'projecttask', title: fetch_modules["modules"]['information']['ProjectTask'].uiLabel, icon: 'calendar-check'});
+                                }
+                                break;
+                            case 'projectmilestone':
+                                if(fetch_modules["modules"]['information']['ProjectMilestone']){
+                                    route.push({ key: 'projectmilestone', title: fetch_modules["modules"]['information']['ProjectMilestone'].uiLabel, icon: 'flag-triangle'});
+                                }
+                                break;
+                        }
+                    })
+                }
+                this.setState({ 'routes': route });
 
             })
 
@@ -118,7 +124,7 @@ class Detail extends Component {
                 this.setState({ 'describeModule': describ['describe']});
             }
 
-            this.setState({ 'record': await fetchRecord(email,pass,record_id,this.state.module,this.state.parent_id)});
+            this.setState({ 'record': await fetchRecord(email,pass,record_id,this.state.module,'')});
         }
     }
 
@@ -136,6 +142,10 @@ class Detail extends Component {
                 return <HistoryPartials/>;
             case 'documents':
                 return <DocumentsPartials/>;
+            case 'projecttask':
+                return <ProjectTaskPartials  investmentHandler={this.loadRecord}/>;
+            case 'projectmilestone':
+                return <ProjectMilestonePartials  investmentHandler={this.loadRecord}/>;
             case 'null':
                 return null;
         }
@@ -147,10 +157,11 @@ class Detail extends Component {
         this.setState({ 'partials': this.state.routes[index]['key'] });
     }
 
+    loadRecord = () =>{
+        this.props.investmentHandler();
+    }
+
     loadList = () => {
-        if(this.state.module == 'ProjectMilestone' || this.state.module == 'ProjectTask'){
-            AsyncStorage.setItem('module', 'Project');
-        }
         AsyncStorage.setItem('record_id', 'false');
         AsyncStorage.setItem('parent_id', '');
         this.props.investmentHandler();
@@ -183,7 +194,7 @@ class Detail extends Component {
         let email =this.state.email
         let pass = this.state.password;
         let record_id = this.state.record_id;
-        this.setState({ 'record': await fetchRecord(email,pass,record_id,this.state.module,this.state.parent_id)});
+        this.setState({ 'record': await fetchRecord(email,pass,record_id,this.state.module,'')});
     }
 
     render() {
@@ -197,7 +208,7 @@ class Detail extends Component {
                             padding : 3 ,
                             textAlign : 'center',
                             width : ((this.state.module == 'Quotes' &&  this.state.record['record'] && (this.state.record['record'].quotestage).toUpperCase() != 'ACCEPTED') || 
-                            (this.state.fetch_modules['modules'] && this.state.record['record'] && this.state.fetch_modules['modules']['information'][this.state.module] &&  this.state.fetch_modules['modules']['information'][this.state.module].edit == '1' && (this.state.module != 'Quotes' && this.state.module != 'Invoice' && this.state.module != 'ProjectMilestone' && this.state.module != 'ProjectTask' )))?'68%':'100%',
+                            (this.state.fetch_modules['modules'] && this.state.record['record'] && this.state.fetch_modules['modules']['information'][this.state.module] &&  this.state.fetch_modules['modules']['information'][this.state.module].edit == '1' && (this.state.module != 'Quotes' || this.state.module != 'Invoice' )))?'68%':'100%',
                             flex : 1,
                             fontSize : 18 ,
                             top : 0,
@@ -211,7 +222,7 @@ class Detail extends Component {
                                 {vtranslate('Accept Quote')}
                             </Button>
                         :null} 
-                        {(this.state.fetch_modules['modules'] && this.state.record['record'] && this.state.fetch_modules['modules']['information'][this.state.module] &&  this.state.fetch_modules['modules']['information'][this.state.module].edit == '1' && (this.state.module != 'Quotes' && this.state.module != 'Invoice' && this.state.module != 'ProjectMilestone' && this.state.module != 'ProjectTask' )) ?
+                        {(this.state.fetch_modules['modules'] && this.state.record['record'] && this.state.fetch_modules['modules']['information'][this.state.module] &&  this.state.fetch_modules['modules']['information'][this.state.module].edit == '1' && (this.state.module != 'Quotes' || this.state.module != 'Invoice' )) ?
                             <Button style={styles.btnPrimary} color="#fff" onPress={() => this.edit()}>
                                 {vtranslate('Edit')} {this.state.describeModule.label}
                             </Button>

@@ -22,7 +22,7 @@ class Edit extends ValidationComponent {
         PortalVtigerDateTimeShow : {},
         PortalVtigerRefersTo : {},
         PortalVtigerRecord : {},
-        PortalVtigerModule : "HelpDesk"
+        PortalVtigerModule : ""
     }
 
     constructor(props) {
@@ -95,6 +95,12 @@ class Edit extends ValidationComponent {
         await AsyncStorage.getItem('record_loading').then((value) => {
             if(value){
                 this.setStateME({ 'PortalVtigerRecord': JSON.parse(value) })
+            }
+        })
+        
+        await AsyncStorage.getItem('module').then((value) => {
+            if(value){
+                this.setState({ 'PortalVtigerModule': value })
             }
         })
 
@@ -271,7 +277,7 @@ class Edit extends ValidationComponent {
         return (
             <ScrollView style = {styles.Modal} nestedScrollEnabled={true}>
                 <Text style = {styles.HeaderText}>
-                    {vtranslate('Edit Ticket')} - {this.state.PortalVtigerRecord.ticket_title}
+                    {vtranslate('Edit')} - {(describeModule['describe'] && describeModule['describe']['labelFields']) ?this.state.PortalVtigerRecord[describeModule['describe']['labelFields']]:''}
                 </Text>
                 
                 <Divider style = {styles.Divider} /> 

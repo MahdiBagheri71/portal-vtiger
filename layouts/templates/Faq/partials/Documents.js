@@ -14,7 +14,6 @@ class Documents extends Component {
         documents : false ,
         module : 'Faq',
         relatedModule : 'Documents',
-        commentcontent : '',
         show_documens_add : false
     }
 

@@ -8,6 +8,7 @@ import { Appbar } from 'react-native-paper';
 
 import Home from './Portal/Home.js'
 import HelpDesk from './HelpDesk/Index'
+import Project from './Project/Index'
 import Faq from './Faq/List'
 import Documents from './Documents/Index'
 import Login from './Portal/Login.js'
@@ -145,6 +146,8 @@ class Header extends Component {
       this.setState({ visible: false });
       
       await AsyncStorage.setItem('record_id', 'false');
+      
+      await AsyncStorage.setItem('parent_id', '');
 
       this.setState({ module: module });
    }
@@ -219,8 +222,10 @@ class Header extends Component {
       switch(module) {
          case 'HelpDesk':
             return <HelpDesk investmentHandler={this.loadModule}/>;
-            case 'Faq':
-               return <Faq investmentHandler={this.loadModule}/>;
+         case 'Project':
+            return <Project investmentHandler={this.loadModule}/>;
+         case 'Faq':
+            return <Faq investmentHandler={this.loadModule}/>;
          case 'Documents':
             return <Documents investmentHandler={this.loadModule}/>;
          case 'Home':

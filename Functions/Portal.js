@@ -2,8 +2,8 @@
 import base64 from 'react-native-base64'
 
 let language_select = 'en_us';
-// let url_base = 'http://www.mahdibagherivar.ir/vt7/modules/CustomerPortal/api.php';
-let url_base = 'http://mahdivar.a-web.ir/modules/CustomerPortal/api.php';
+let url_base = 'http://www.mahdibagherivar.ir/vt7/modules/CustomerPortal/api.php';
+// let url_base = 'http://mahdivar.a-web.ir/modules/CustomerPortal/api.php';
 
 let languages = {
     'fa_ir' :  require('../i18n/fa_ir.json'),
