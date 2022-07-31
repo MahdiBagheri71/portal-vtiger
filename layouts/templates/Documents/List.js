@@ -7,7 +7,7 @@ const { StorageAccessFramework } = FileSystem;
 
 import { DataTable,Appbar,FAB,Button,ActivityIndicator  } from 'react-native-paper';
 
-import {per_page,coun_header} from '../../../global.js' 
+import {per_page,coun_header_doc} from '../../../global.js' 
 import DocumentsAdd from './Add.js'
 
 class List extends Component {
@@ -20,7 +20,7 @@ class List extends Component {
         mode : 'mine' ,
         show_help_documents_add : false,
         describeModule : {} ,
-        counShowHeader : coun_header ,
+        counShowHeader : coun_header_doc ,
         perPage : per_page ,
         page : 0,
         order : '',
@@ -249,6 +249,14 @@ class List extends Component {
                                                         }else if(this.state.describeModule[row[0]]['type'].name == 'double' || this.state.describeModule[row[0]]['type'].name == 'currency'){
                                                             return (
                                                                 <DataTable.Cell key={row[1]}>{Number(row[1]).toFixed(2)}</DataTable.Cell>
+                                                            )
+                                                        }else if(this.state.describeModule[row[0]]['type'].name == 'integer'  && row[0] == 'filesize'){
+                                                            return (
+                                                                <DataTable.Cell key={row[1]}>{Number((row[1] / 1024)).toFixed(2)} KB</DataTable.Cell>
+                                                            )
+                                                        }else if(this.state.describeModule[row[0]]['type'].name == 'string'  && row[0] == 'filelocationtype'){
+                                                            return (
+                                                                <DataTable.Cell key={row[1]}>{(row[1]=="I" ? vtranslate("Internal") :(row[1]=="E" ? vtranslate("External") : ""))}</DataTable.Cell>
                                                             )
                                                         }else if(this.state.describeModule[row[0]]['type'].name == 'boolean'){
                                                             return (

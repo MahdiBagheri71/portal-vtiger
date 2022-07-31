@@ -132,6 +132,20 @@ class Detail extends Component {
                                         <Text style={styles.recordValue}  key={row[1]}>{Number(row[1]).toFixed(2)}</Text>
                                     </View>
                                 )
+                            }else if(this.state.describeModule[row[0]]['type'].name == 'integer'  && row[0] == 'filesize'){
+                                return (
+                                    <View key={row[0]} style={styles.recordField}>
+                                        <Text style={styles.recordLabel}>{this.state.describeModule[row[0]].label}</Text>
+                                        <Text style={styles.recordValue}  key={row[1]}>{Number((row[1] / 1024)).toFixed(2)} KB</Text>
+                                    </View>
+                                )
+                            }else if(this.state.describeModule[row[0]]['type'].name == 'string'  && row[0] == 'filelocationtype'){
+                                return (
+                                    <View key={row[0]} style={styles.recordField}>
+                                        <Text style={styles.recordLabel}>{this.state.describeModule[row[0]].label}</Text>
+                                        <Text style={styles.recordValue}  key={row[1]}>{(row[1]=="I" ? vtranslate("Internal") :(row[1]=="E" ? vtranslate("External") : ""))}</Text>
+                                    </View>
+                                )
                             }else if(this.state.describeModule[row[0]]['type'].name == 'boolean'){
                                 return (
                                     <View key={row[0]} style={styles.recordField}>
