@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { Modal, Text,View, StyleSheet,Image,ScrollView ,Dimensions} from 'react-native'
+import { Modal, Text,View, StyleSheet,Image,ScrollView ,Dimensions,TextInput} from 'react-native'
 import '../../global.js' 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {vtranslate,updateLang,fetchModules} from '../../Functions/Portal' ;
+import {vtranslate,updateLang,fetchModules,changePassword} from '../../Functions/Portal' ;
 import { Appbar } from 'react-native-paper';
 
 
@@ -30,7 +30,11 @@ class Header extends Component {
       visible : false ,
       header_no_show : ['Contacts','Accounts','ProjectTask','ProjectMilestone'],
       loginView : 'false',
-      heightHome : Dimensions.get('window').height-158
+      heightHome : Dimensions.get('window').height-158,
+      visibleChangePass : false,
+      currentPassword : '',
+      newPassword : '',
+      confirmPassword : ''
    }
 
    componentDidMount = async () => {
@@ -189,18 +193,20 @@ class Header extends Component {
              fetch_modules ='';
          }
          if(fetch_modules == ''){
-              fetch_modules = await fetchModules(email,pass);
-              if(fetch_modules){
-                 AsyncStorage.setItem('fetch_modules', JSON.stringify(fetch_modules));
-                 
-                 AsyncStorage.setItem('email', email);
-                 AsyncStorage.setItem('password', pass);
-                 AsyncStorage.setItem('loginView', "false");
-                 this.setState({ loginView: 'false' });
-                 this.setState({ fetch_modules: fetch_modules });
-              }else{
-                 this.logout();
-              }
+            let email =this.state.email
+            let pass = this.state.password;
+            fetch_modules = await fetchModules(email,pass);
+            if(fetch_modules){
+               AsyncStorage.setItem('fetch_modules', JSON.stringify(fetch_modules));
+               
+               AsyncStorage.setItem('email', email);
+               AsyncStorage.setItem('password', pass);
+               AsyncStorage.setItem('loginView', "false");
+               this.setState({ loginView: 'false' });
+               this.setState({ fetch_modules: fetch_modules });
+            }else{
+               this.logout();
+            }
          }
 
 
@@ -243,6 +249,18 @@ class Header extends Component {
    componentWillUnmount() {
        this._isMounted = false;
    }
+
+   changePassWordModal = async() => {
+      
+      let email =this.state.email
+      let pass = this.state.password;
+      var res = await changePassword(email,pass,{'oldPassword':this.state.currentPassword,'newPassword':this.state.newPassword});
+      if(res){
+         this.setState({'visibleChangePass':false});
+         alert(res);
+         this.logout();
+      }
+   }
     
    render() {
       if (this.state.loginView == 'false' && this.state.fetch_modules['modules'] ){
@@ -277,13 +295,51 @@ class Header extends Component {
                                     }
                                  )}   
                                  <Divider style = {styles.Divider} />
-                                 <Button style = {styles.submitButton} onPress={() => this.setModule('Profile')} ><Text style = {styles.submitButtonText}>{vtranslate("Profile")}</Text></Button>
-                                 <Button style = {styles.submitButton} onPress={() => {}} ><Text style = {styles.submitButtonText}>{vtranslate("Change Password")}</Text></Button>
+                                 <Button style = {this.state.module == 'Profile'?styles.selectSubmitButton:styles.submitButton} onPress={() => this.setModule('Profile')} ><Text style = {this.state.module == 'Profile'?styles.selectButtonText: styles.submitButtonText}>{vtranslate("Profile")}</Text></Button>
+                                 <Button style = {styles.submitButton} onPress={() => this.setState({'visibleChangePass':true})} ><Text style = {styles.submitButtonText}>{vtranslate("Change Password")}</Text></Button>
                                  <Button style = {styles.submitButton} onPress={() => this.logout()}><Text style = {styles.submitButtonText}>{vtranslate("Logout")}</Text></Button>
                                  <Divider style = {styles.Divider} /> 
                                  
                                  <Button style = {styles.submitButton} onPress={() => this.closeMenu()}><Text style = {styles.submitButtonText}>{vtranslate("Cancel")}</Text></Button>
                               </View>
+                        </ScrollView>
+                     </Modal>
+                     <Modal animationType = {"slide"} transparent = {false}
+                        visible = {this.state.visibleChangePass}>
+                        <ScrollView>
+                           <View>
+                              <Text style={{fontSize : 25 , textAlign : 'center' , width:'100%' ,padding : 5}}>
+                                 {vtranslate('Change Password')}
+                              </Text>
+                              <Divider style = {styles.Divider} /> 
+                              <View>
+                                 <Text style={{fontSize : 16 , textAlign : 'center' , width:'100%' ,padding : 5}}>{vtranslate('Current Password')}</Text>
+                                 <TextInput style = {styles.inputTextArea} secureTextEntry={true}  onChangeText={(val) => this.setState({currentPassword : val})} />
+                              </View>
+                              <View>
+                                 <Text style={{fontSize : 16 , textAlign : 'center' , width:'100%' ,padding : 5}}>{vtranslate('New Password')}</Text>
+                                 <TextInput style = {styles.inputTextArea} secureTextEntry={true}  onChangeText={(val) => this.setState({newPassword : val})} />
+                              </View>
+                              <View>
+                                 <Text style={{fontSize : 16 , textAlign : 'center' , width:'100%' ,padding : 5}}>{vtranslate('Confirm Password')}</Text>
+                                 <TextInput style = {styles.inputTextArea} secureTextEntry={true}  onChangeText={(val) => this.setState({confirmPassword : val})} />
+                              </View>
+                           </View>
+                           <View>
+                              {(this.state.currentPassword && this.state.currentPassword == this.state.newPassword)?<Text  style={{fontSize : 25 , textAlign : 'center' , width:'100%' ,padding : 5 ,color:'#a94442'}}>
+                                 {vtranslate('New password cannot be same as current password.')}
+                              </Text>:null}
+                              {(this.state.newPassword && this.state.newPassword != this.state.confirmPassword)?<Text  style={{fontSize : 25 , textAlign : 'center' , width:'100%' ,padding : 5 ,color:'#a94442'}}>
+                                 {vtranslate('Re-confirm your password')}
+                              </Text>:null}
+                           </View>
+                           {(this.state.currentPassword.length>0 && this.state.newPassword.length>0 && this.state.confirmPassword.length>0
+                              && this.state.currentPassword != this.state.newPassword && this.state.newPassword == this.state.confirmPassword)?
+                              <Button style = {styles.TextStatusSave} color={"#fff"} onPress={() => this.changePassWordModal()}>
+                                    <Text style = {styles.submitButtonTextCancel}>{ this.state.PortalVtigerDisableButton ? vtranslate("Loading"): vtranslate("Save")}</Text>
+                              </Button>
+                           :null}
+                           <Button style = {styles.submitButtonCancel} color={"#000"} onPress={() => this.setState({'visibleChangePass':false})} ><Text style = {styles.submitButtonTextCancel}>{vtranslate("Cancel")}</Text></Button>
                         </ScrollView>
                      </Modal>
                   </Provider>
@@ -332,6 +388,21 @@ const styles = StyleSheet.create({
       right : 0,
       top : 0
    },
+   inputTextArea:{
+       margin: 20,
+       borderColor: '#ccc',
+       borderWidth: 1,
+       padding : 10
+   },
+   TextStatusSave:{
+       backgroundColor :'#5cb85c',
+       borderRadius : 5,
+       textAlign : 'center',
+       width : 'auto',
+       color : '#fff',
+       padding : 5,
+       margin : 5
+   },
    imagHeader :{
       width : 180,
       height : 42,
@@ -375,5 +446,19 @@ const styles = StyleSheet.create({
    Divider:{
       padding : 1 ,
       margin : 25
-   }
+   },
+   submitButtonCancel : {
+      borderRadius : 5,
+      textAlign : 'center',
+      width : 'auto',
+      color : '#333',
+      padding : 5,
+      margin : 5,
+      borderWidth :1 ,
+      borderColor : '#adadad',
+      marginBottom : 25
+  },
+  submitButtonTextCancel : {
+      color : "#000"
+  }
 })
