@@ -622,12 +622,12 @@ export const  fetchProfile = async (user_name,password) => {
 
 }
 
-export const  changePassword = async (user_name,password,record) => {
+export const  changePassword = async (user_name,password,oldPassword,newPassword) => {
 
     var details = {
         '_operation' : 'ChangePassword',
-        'password' : record['oldPassword'],
-        'newPassword' : record['newPassword'],
+        'password' : oldPassword,
+        'newPassword' : newPassword,
         'username' : user_name
     };
 
@@ -640,6 +640,31 @@ export const  changePassword = async (user_name,password,record) => {
         alert(vtranslate(result['error']['message']));
         return false;
     }else if(result.hasOwnProperty('result') && result.hasOwnProperty('success') && result['success']==true){
+        return result['result'];
+    }else {
+        alert(JSON.stringify(result));
+        return false;
+    }
+
+}
+
+export const  forgotPassword = async (email) => {
+
+    var details = {
+        '_operation' : 'ForgotPassword',
+        'email' : email
+    };
+
+    var text = email+": ";
+    var encoded_base64 = base64.encode(text);
+
+    var result = await api(details,encoded_base64);
+
+    if (result.hasOwnProperty('error') && result['error'].hasOwnProperty('message') ){
+        alert(vtranslate(result['error']['message']));
+        return false;
+    }else if(result.hasOwnProperty('result') && result.hasOwnProperty('success') && result['success']==true){
+        alert(vtranslate(result['result']))
         return result['result'];
     }else {
         alert(JSON.stringify(result));

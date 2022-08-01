@@ -203,6 +203,9 @@ class Header extends Component {
                AsyncStorage.setItem('password', pass);
                AsyncStorage.setItem('loginView', "false");
                this.setState({ loginView: 'false' });
+               this.setState({ currentPassword: '' });
+               this.setState({ newPassword: '' });
+               this.setState({ confirmPassword: '' });
                this.setState({ fetch_modules: fetch_modules });
             }else{
                this.logout();
@@ -254,10 +257,10 @@ class Header extends Component {
       
       let email =this.state.email
       let pass = this.state.password;
-      var res = await changePassword(email,pass,{'oldPassword':this.state.currentPassword,'newPassword':this.state.newPassword});
+      var res = await changePassword(email,pass,this.state.currentPassword,this.state.newPassword);
       if(res){
          this.setState({'visibleChangePass':false});
-         alert(res);
+         alert(vtranslate(res));
          this.logout();
       }
    }
@@ -336,7 +339,7 @@ class Header extends Component {
                            {(this.state.currentPassword.length>0 && this.state.newPassword.length>0 && this.state.confirmPassword.length>0
                               && this.state.currentPassword != this.state.newPassword && this.state.newPassword == this.state.confirmPassword)?
                               <Button style = {styles.TextStatusSave} color={"#fff"} onPress={() => this.changePassWordModal()}>
-                                    <Text style = {styles.submitButtonTextCancel}>{ this.state.PortalVtigerDisableButton ? vtranslate("Loading"): vtranslate("Save")}</Text>
+                                    <Text style = {styles.submitButtonTextCancel}>{ vtranslate("Save")}</Text>
                               </Button>
                            :null}
                            <Button style = {styles.submitButtonCancel} color={"#000"} onPress={() => this.setState({'visibleChangePass':false})} ><Text style = {styles.submitButtonTextCancel}>{vtranslate("Cancel")}</Text></Button>

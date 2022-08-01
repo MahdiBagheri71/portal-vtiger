@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import {View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native'
+import {View, Text, TouchableOpacity, TextInput, StyleSheet,Modal,ScrollView } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {  Divider } from 'react-native-paper';
+import {  Divider,Button } from 'react-native-paper';
 import '../../../global.js' 
-import {vtranslate,updateLang,ping,fetchModules} from '../../../Functions/Portal';
+import {vtranslate,updateLang,ping,fetchModules,forgotPassword} from '../../../Functions/Portal';
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
@@ -23,9 +23,13 @@ const data_lang = [
 
 class Login extends Component {
    state = {
+      email : '',
+      password : '',
       lang:"",
       loginView : 'true',
       disableButton : false,
+      visiblePass : false,
+      emailPassword : ''
    }
 
    componentDidMount = () => {
@@ -58,8 +62,6 @@ class Login extends Component {
       if(this.state.disableButton){
          return;
      }
-     this.state.disableButton = true;
-      this.setState({ 'disableButton': true });
       var error ='';
       if(email.trim() == ""){
          error = error + '\n'+ vtranslate('Enter your email address.')
@@ -70,6 +72,8 @@ class Login extends Component {
       if(error.trim() != ""){
          alert(error)
       }else{
+         this.state.disableButton = true;
+         this.setState({ 'disableButton': true });
          var login = await ping(email,pass);
          if(login =='login :) '){
             AsyncStorage.setItem('email', email);
@@ -123,6 +127,11 @@ class Login extends Component {
         this._isMounted = false;
     }
 
+    changeForgotPasswordModal = async() => {
+       await forgotPassword(this.state.emailPassword);
+      this.setState({'visiblePass':false})
+    }
+
    render() {
       return (
          <View style = {styles.containerLogin}>
@@ -170,12 +179,53 @@ class Login extends Component {
             </View>
             
             <TouchableOpacity
+               onPress = {
+                  () => this.setState({visiblePass:true})
+               }>
+               <Text style = {{color:'#31708f',padding : 10 , marginRight : 50}}> {vtranslate('Forgot Password?')} </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
                style = {styles.submitButtonLogin}
                onPress = {
                   () => this.login(this.state.email, this.state.password)
                }>
                <Text style = {styles.submitButtonTextLogin}> {this.state.disableButton ? vtranslate("Loading"):vtranslate('Sign in')} </Text>
             </TouchableOpacity>
+            <Modal animationType = {"slide"} transparent = {false}
+                        visible = {this.state.visiblePass}>
+                        <ScrollView>
+                           <View>
+                              <Text style={{fontSize : 25 , textAlign : 'center' , width:'100%' ,padding : 5}}>
+                                 {vtranslate('Forgot Password')}
+                              </Text>
+                              <Divider style = {styles.Divider} /> 
+                              <View>
+                                 <Text style={{fontSize : 16 , textAlign : 'center' , width:'100%' ,padding : 5}}>{vtranslate('E-mail')}</Text>
+                                 <TextInput style = {styles.inputTextArea}  onChangeText={(val) => this.setState({emailPassword : val})} />
+                              </View>
+                           </View>
+                           <View>
+                              {(this.state.emailPassword && !String(this.state.emailPassword)
+                                            .toLowerCase()
+                                            .match(
+                                            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                                            ))?<Text  style={{fontSize : 25 , textAlign : 'center' , width:'100%' ,padding : 5 ,color:'#a94442'}}>
+                                 {vtranslate('Enter a valid email address')}
+                              </Text>:null}
+                           </View>
+                           {(this.state.emailPassword && String(this.state.emailPassword)
+                                            .toLowerCase()
+                                            .match(
+                                            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                                            ))?
+                              <Button style = {styles.TextStatusSave} color={"#fff"} onPress={() => this.changeForgotPasswordModal()}>
+                                    <Text style = {styles.submitButtonTextCancel}>{ vtranslate("Submit")}</Text>
+                              </Button>
+                           :null}
+                           <Button style = {styles.submitButtonCancel} color={"#000"} onPress={() => this.setState({'visiblePass':false})} ><Text style = {styles.submitButtonTextCancel}>{vtranslate("Cancel")}</Text></Button>
+                        </ScrollView>
+                     </Modal>
          </View>
       )
    }
@@ -261,4 +311,35 @@ const styles = StyleSheet.create({
       height: 40,
       fontSize: 16,
    },
+   
+   inputTextArea:{
+      margin: 20,
+      borderColor: '#ccc',
+      borderWidth: 1,
+      padding : 10
+  },
+  TextStatusSave:{
+      backgroundColor :'#5cb85c',
+      borderRadius : 5,
+      textAlign : 'center',
+      width : 'auto',
+      color : '#fff',
+      padding : 5,
+      margin : 5
+  },
+
+  submitButtonCancel : {
+   borderRadius : 5,
+   textAlign : 'center',
+   width : 'auto',
+   color : '#333',
+   padding : 5,
+   margin : 5,
+   borderWidth :1 ,
+   borderColor : '#adadad',
+   marginBottom : 25
+},
+submitButtonTextCancel : {
+   color : "#000"
+}
 })
