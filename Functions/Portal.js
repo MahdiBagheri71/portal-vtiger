@@ -595,3 +595,55 @@ export const  searchFaqs = async (user_name,password,module, searchKey) => {
     }
 
 }
+
+
+export const  fetchProfile = async (user_name,password) => {
+
+    var details = {
+        '_operation': 'FetchProfile',
+        'username' : user_name,
+        'password' : password
+    };
+
+    var text = user_name+":"+password;
+    var encoded_base64 = base64.encode(text);
+
+    var result = await api(details,encoded_base64);
+
+    if (result.hasOwnProperty('error') && result['error'].hasOwnProperty('message') ){
+        alert(vtranslate(result['error']['message']));
+        return false;
+    }else if(result.hasOwnProperty('result') && result.hasOwnProperty('success') && result['success']==true){
+        return result['result'];
+    }else {
+        alert(JSON.stringify(result));
+        return false;
+    }
+
+}
+
+export const  changePassword = async (user_name,password,record) => {
+
+    var details = {
+        '_operation' : 'ChangePassword',
+        'password' : record['oldPassword'],
+        'newPassword' : record['newPassword'],
+        'username' : user_name
+    };
+
+    var text = user_name+":"+password;
+    var encoded_base64 = base64.encode(text);
+
+    var result = await api(details,encoded_base64);
+
+    if (result.hasOwnProperty('error') && result['error'].hasOwnProperty('message') ){
+        alert(vtranslate(result['error']['message']));
+        return false;
+    }else if(result.hasOwnProperty('result') && result.hasOwnProperty('success') && result['success']==true){
+        return result['result'];
+    }else {
+        alert(JSON.stringify(result));
+        return false;
+    }
+
+}

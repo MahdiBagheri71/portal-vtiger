@@ -14,6 +14,7 @@ import Documents from './Documents/Index'
 import Login from './Portal/Login.js'
 import IndexPortal from './Portal/Index'
 import Footer from './Footer.js'
+import Profile from './Portal/Profile';
 
 import { Button, Divider, Provider } from 'react-native-paper';
 
@@ -230,6 +231,8 @@ class Header extends Component {
             return <Documents investmentHandler={this.loadModule}/>;
          case 'Home':
             return <Home investmentHandler={this.loadModule}/>;
+         case 'Profile':
+            return <Profile investmentHandler={this.loadModule}/>;
          case 'null':
                return null;
          default:
@@ -274,7 +277,7 @@ class Header extends Component {
                                     }
                                  )}   
                                  <Divider style = {styles.Divider} />
-                                 <Button style = {styles.submitButton} onPress={() => {}} ><Text style = {styles.submitButtonText}>{vtranslate("Profile")}</Text></Button>
+                                 <Button style = {styles.submitButton} onPress={() => this.setModule('Profile')} ><Text style = {styles.submitButtonText}>{vtranslate("Profile")}</Text></Button>
                                  <Button style = {styles.submitButton} onPress={() => {}} ><Text style = {styles.submitButtonText}>{vtranslate("Change Password")}</Text></Button>
                                  <Button style = {styles.submitButton} onPress={() => this.logout()}><Text style = {styles.submitButtonText}>{vtranslate("Logout")}</Text></Button>
                                  <Divider style = {styles.Divider} /> 
