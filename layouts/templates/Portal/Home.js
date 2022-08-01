@@ -107,6 +107,7 @@ class Home extends Component {
     setRecord = (module,record) => {
         AsyncStorage.setItem('record_id', record);
         AsyncStorage.setItem('parent_id', '');
+        
         this.setModule(module);
     }
 
@@ -160,6 +161,35 @@ class Home extends Component {
                                             () => this.setRecord('Documents',document.id)
                                             }>
                                             <Text  style = {styles.submitButtonTextLink}>{document.label}</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )
+                            })
+                        } 
+                    </View>
+                </View>
+            );
+        }
+        
+        return null;
+    }
+
+    recenFags = () =>{
+        var fetchRecentRecords = this.state.fetchRecentRecords;
+        if(fetchRecentRecords[2] && fetchRecentRecords[2]['Faq']){
+            return (
+
+                <View style = {styles.RecentHelpDesk}>
+                    <Text>{vtranslate("Recent FAQ")}</Text>
+                    <View  style = {styles.RecentHelpDeskTable}>
+                        {fetchRecentRecords[2]['Faq'].map((faq ) => {
+                                return (
+                                    <View key={faq.id} style = {styles.RecentHelpDeskTableRow}>
+                                        <TouchableOpacity
+                                            onPress = {
+                                            () => this.setRecord('Faq',faq.id)
+                                            }>
+                                            <Text  style = {styles.submitButtonTextLink}>{faq.label}</Text>
                                         </TouchableOpacity>
                                     </View>
                                 )
@@ -239,6 +269,7 @@ class Home extends Component {
                     {this.shortcuts()}
                     {this.recentHelpDesk()}
                     {this.recentDocuments()}
+                    {this.recenFags()}
                 </View> 
 
                 <View>

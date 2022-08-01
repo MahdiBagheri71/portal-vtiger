@@ -57,7 +57,7 @@ class ListFaq extends Component {
 
                 this.setState({ 'describeModule': fields});
             }
-            this.fetchRecordsMe();
+            await this.fetchRecordsMe();
         }
 
     }
@@ -172,7 +172,7 @@ class ListFaq extends Component {
                             value={this.state.searchQuery}
                             />
 
-                        <View style={{padding : 25,width : '100%'}}>
+                        {this.state.describeModule['faqcategories']?<View style={{padding : 25,width : '100%'}}>
                             <Text style={{textAlign: 'center',width : '100%'}}>{vtranslate('Categories')} : </Text>
                             <Dropdown
                                 style={styles.dropdown}
@@ -195,7 +195,7 @@ class ListFaq extends Component {
                                     <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
                                 )}
                                 />
-                        </View>
+                        </View>:null}
 
                         <Text style={{padding : 15,width : '100%',textAlign: 'center'}}>
                             {vtranslate("Top Questions")}
