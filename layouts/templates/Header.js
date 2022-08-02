@@ -2,8 +2,8 @@ import React, { Component } from 'react'
 import { Modal, Text,View, StyleSheet,Image,ScrollView ,Dimensions,TextInput} from 'react-native'
 import '../../global.js' 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {vtranslate,updateLang,fetchModules,changePassword} from '../../Functions/Portal' ;
-import { Appbar } from 'react-native-paper';
+import {vtranslate,updateLang,fetchModules,changePassword,searchRecords} from '../../Functions/Portal' ;
+import { Appbar,Searchbar } from 'react-native-paper';
 
 
 import Home from './Portal/Home.js'
@@ -28,13 +28,16 @@ class Header extends Component {
       company_detail :{},
       modules_header:{},
       visible : false ,
+      visibleSearch : false,
       header_no_show : ['Contacts','Accounts','ProjectTask','ProjectMilestone'],
       loginView : 'false',
       heightHome : Dimensions.get('window').height-158,
       visibleChangePass : false,
       currentPassword : '',
       newPassword : '',
-      confirmPassword : ''
+      confirmPassword : '',
+      searchQuery : '',
+      searchRecordsAll : {},
    }
 
    componentDidMount = async () => {
@@ -142,6 +145,10 @@ class Header extends Component {
       this.setState({ visible: false })
    }
 
+   openSearch = ()=>{
+      this.setState({ visibleSearch: true })
+   }
+
    setModule = async(module) => {      
       
       this.setState({ module: 'null' });
@@ -151,6 +158,21 @@ class Header extends Component {
       this.setState({ visible: false });
       
       await AsyncStorage.setItem('record_id', 'false');
+      
+      await AsyncStorage.setItem('parent_id', '');
+
+      this.setState({ module: module });
+   }
+
+   setModuleRecord = async(record_id,module) => {      
+      
+      this.setState({ module: 'null' });
+      
+      await AsyncStorage.setItem('module', module);
+      
+      this.setState({ 'visibleSearch':false,'searchQuery' : '','searchRecordsAll':{} });
+      
+      await AsyncStorage.setItem('record_id', record_id);
       
       await AsyncStorage.setItem('parent_id', '');
 
@@ -259,10 +281,24 @@ class Header extends Component {
       let pass = this.state.password;
       var res = await changePassword(email,pass,this.state.currentPassword,this.state.newPassword);
       if(res){
-         this.setState({'visibleChangePass':false});
+         await this.setState({'visibleChangePass':false});
          alert(vtranslate(res));
-         this.logout();
+         await this.logout();
       }
+   }
+
+   onChangeSearch = async (query ) => {
+      this.setState({'searchQuery':query,'searchRecordsAll':{}});
+
+      if(query.length > 2){
+         let email =this.state.email
+         let pass = this.state.password;
+         var res = await searchRecords(email,pass,this.state.searchQuery);
+         if(res){
+            this.setState({'searchRecordsAll':res});
+         }
+      }
+
    }
     
    render() {
@@ -274,7 +310,7 @@ class Header extends Component {
                   <Appbar.Header style = {styles.container}>
                      <Image style ={styles.imagHeader} source={require('../../assets/favicon.png')} />
                      <Appbar.Content title={this.state.company_detail['organizationname']} />
-                     <Appbar.Action icon="magnify"/>
+                     <Appbar.Action icon="magnify"  onPress={this.openSearch}/>
                      <Appbar.Action icon="dots-vertical" onPress={this.openMenu} />
                   </Appbar.Header>
                   {/* <Image style ={styles.imagHeader} source={require('../../assets/favicon.png')} /> */}
@@ -345,6 +381,54 @@ class Header extends Component {
                            <Button style = {styles.submitButtonCancel} color={"#000"} onPress={() => this.setState({'visibleChangePass':false})} ><Text style = {styles.submitButtonTextCancel}>{vtranslate("Cancel")}</Text></Button>
                         </ScrollView>
                      </Modal>
+                     
+                     <Modal animationType = {"slide"} transparent = {false}
+                        visible = {this.state.visibleSearch}>
+                        <ScrollView>
+                           <View>
+                              <Text style={{fontSize : 25 , textAlign : 'center' , width:'100%' ,padding : 5}}>
+                                 {vtranslate('Search')}
+                              </Text>
+                              <Divider style = {styles.Divider} /> 
+                              <Searchbar
+                                 style = {styles.Searchbar}
+                                 placeholder={vtranslate('Search')}
+                                 onChangeText={this.onChangeSearch}
+                                 value={this.state.searchQuery}
+                              />
+                              <Divider style = {styles.Divider} /> 
+                              <View>
+                                 {Object.entries(this.state.searchRecordsAll).map((row) => {
+                                       let module = row[1].uiLabel?row[1].uiLabel:false;
+                                       let records = row[1];
+                                       if (module){
+                                          return (
+                                             Object.entries(records).map((record) => {
+                                                if(Number(record[0])>= 0){
+                                                   return (
+                                                      <View key={record[0]} style = {styles.SearchRecord}>
+                                                         <Button color='#000' onPress={()=>this.setModuleRecord(record[1].id,row[0])}  style = {styles.SearchRecordBody}>
+                                                            <Text style = {styles.SearchRecordModule}>
+                                                                 {"    "+module+"   "}  
+                                                            </Text>
+                                                         </Button>
+                                                         <Button color='#000' onPress={()=>this.setModuleRecord(record[1].id,row[0])}  style = {styles.SearchRecordBody}>
+                                                            {"    "+record[1].label+"   "}
+                                                         </Button>
+                                                      </View>
+                                                   );
+                                                }
+                                             })
+                                          )
+                                       }
+                                       return null;
+                                    }
+                                 )}  
+                              </View>
+                           </View>
+                           <Button style = {styles.submitButtonCancel} color={"#000"} onPress={() => this.setState({'visibleSearch':false,'searchQuery' : '','searchRecordsAll':{}})} ><Text style = {styles.submitButtonTextCancel}>{vtranslate("Cancel")}</Text></Button>
+                        </ScrollView>
+                     </Modal>
                   </Provider>
                </View>
 
@@ -382,6 +466,29 @@ class Header extends Component {
 export default Header
 
 const styles = StyleSheet.create({
+   Searchbar :{
+      marginRight : 25,
+      marginLeft : 25
+   },
+   SearchRecord : {
+      width : '90%',
+      marginRight : 25,
+      marginLeft : 25,
+      padding : 10,
+      borderBottomWidth : 5,
+      borderBottomColor : '#428bca',
+   },
+   SearchRecordBody :{
+      marginRight : 25,
+      marginLeft : 25,
+      backgroundColor : '#ededed',
+      textAlign : 'center'
+   },
+   SearchRecordModule :{
+      color : '#fff',
+      backgroundColor : '#5bc0de',
+      textAlign : 'center'
+   },
    container: {
       // paddingTop: 23,
       // marginTop : 40,
