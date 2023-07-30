@@ -286,11 +286,11 @@ export default History
 
 const styles = StyleSheet.create({
     historyContent : {
-        width: Dimensions.get('window').width  -20 ,
+        width: Dimensions.get('window').width -50 ,
         padding : 3 ,
         borderBottomWidth : 1 ,
         borderColor : '#eee',
-        margin : 10
+        margin : 15
     },
     historyRecord : {
         width: Dimensions.get('window').width -20,
@@ -302,9 +302,5 @@ const styles = StyleSheet.create({
         backgroundColor : '#428bca',
         padding : 3,
         marginBottom : 8
-    },
-    historyContent:{
-        width: Dimensions.get('window').width -50 ,
-        margin : 15
     }
 })
