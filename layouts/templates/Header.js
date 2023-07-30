@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Modal, Text,View, StyleSheet,Image,ScrollView ,Dimensions,TextInput} from 'react-native'
-import '../../global.js' 
+
+import {color_bg} from '../../global.js'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {vtranslate,updateLang,fetchModules,changePassword,searchRecords} from '../../Functions/Portal' ;
 import { Appbar,Searchbar } from 'react-native-paper';

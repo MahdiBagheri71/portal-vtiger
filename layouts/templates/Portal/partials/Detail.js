@@ -54,11 +54,11 @@ class Detail extends Component {
         let pass = this.state.password;
         let record_id = this.state.record_id;
         if(email && pass && record_id){
-            var describ = await describeModule(email,pass,this.state.module);
+            var describe = await describeModule(email,pass,this.state.module);
             
-            if(describ['describe']['fields']){
+            if(describe['describe']['fields']){
                 var fields = {};
-                Object.entries(describ['describe']['fields']).map( field_obj =>{
+                Object.entries(describe['describe']['fields']).map( field_obj =>{
                     let field = field_obj[1];
                     fields[field.name]=field;
                 })

@@ -8,7 +8,7 @@ import { MultiSelect,Dropdown  } from 'react-native-element-dropdown';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-import '../../../global.js' 
+import {color_bg} from '../../../global.js'
 
 class Add extends ValidationComponent {
 

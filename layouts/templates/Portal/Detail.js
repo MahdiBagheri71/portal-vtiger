@@ -111,11 +111,11 @@ class Detail extends Component {
 
             })
 
-            var describ = await describeModule(email,pass,this.state.module);
+            var describe = await describeModule(email,pass,this.state.module);
             
-            if(describ['describe']){
+            if(describe['describe']){
 
-                this.setState({ 'describeModule': describ['describe']});
+                this.setState({ 'describeModule': describe['describe']});
             }
 
             this.setState({ 'record': await fetchRecord(email,pass,record_id,this.state.module,this.state.parent_id)});

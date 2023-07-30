@@ -46,11 +46,11 @@ class ListFaq extends Component {
         let email =this.state.email
         let pass = this.state.password;
         if(email && pass ){
-            var describ = await describeModule(email,pass,this.state.module);
+            var describe = await describeModule(email,pass,this.state.module);
             
-            if(describ['describe']['fields']){
+            if(describe['describe']['fields']){
                 var fields = {};
-                Object.entries(describ['describe']['fields']).map( field_obj =>{
+                Object.entries(describe['describe']['fields']).map( field_obj =>{
                     let field = field_obj[1];
                     fields[field.name]=field;
                 })

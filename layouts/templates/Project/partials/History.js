@@ -50,11 +50,11 @@ class History extends Component {
         let pass = this.state.password;
         let record_id = this.state.record_id;
         if(email && pass && record_id){
-            var describ = await describeModule(email,pass,this.state.module);
+            var describe = await describeModule(email,pass,this.state.module);
             
-            if(describ['describe']['fields']){
+            if(describe['describe']['fields']){
                 var fields = {};
-                Object.entries(describ['describe']['fields']).map( field_obj =>{
+                Object.entries(describe['describe']['fields']).map( field_obj =>{
                     let field = field_obj[1];
                     fields[field.name]=field;
                 })
@@ -292,11 +292,11 @@ export default History
 
 const styles = StyleSheet.create({
     historyContent : {
-        width: Dimensions.get('window').width  -20 ,
+        width: Dimensions.get('window').width -50 ,
         padding : 3 ,
         borderBottomWidth : 1 ,
         borderColor : '#eee',
-        margin : 10
+        margin : 15
     },
     historyRecord : {
         width: Dimensions.get('window').width -20,
@@ -308,9 +308,5 @@ const styles = StyleSheet.create({
         backgroundColor : '#428bca',
         padding : 3,
         marginBottom : 8
-    },
-    historyContent:{
-        width: Dimensions.get('window').width -50 ,
-        margin : 15
     }
 })

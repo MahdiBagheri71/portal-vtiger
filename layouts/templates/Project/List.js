@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { DataTable,Appbar,Button,ActivityIndicator  } from 'react-native-paper';
 
-import {per_page,coun_header} from '../../../global.js' 
+import {per_page,count_header,color_bg} from '../../../global.js'
 
 class List extends Component {
     state = {
@@ -17,7 +17,7 @@ class List extends Component {
         mode : 'mine' ,
         show_help_desk_add : false,
         describeModule : {} ,
-        counShowHeader : coun_header ,
+        countShowHeader : count_header ,
         perPage : per_page ,
         page : 0,
         order : '',
@@ -80,11 +80,11 @@ class List extends Component {
 
             })
 
-            var describ = await describeModule(email,pass,this.state.module);
+            var describe = await describeModule(email,pass,this.state.module);
             
-            if(describ['describe']['fields']){
+            if(describe['describe']['fields']){
                 var fields = {};
-                Object.entries(describ['describe']['fields']).map( field_obj =>{
+                Object.entries(describe['describe']['fields']).map( field_obj =>{
                     let field = field_obj[1];
                     fields[field.name]=field;
                 })
@@ -173,7 +173,7 @@ class List extends Component {
                             <DataTable style={styles.DataTable}>
                                 <DataTable.Header style={styles.DataTableHeader}>
                                     {this.state.fetchRecords['count'] > 0 ? (Object.entries(this.state.fetchRecords[0]).map((row ) => {
-                                        if (row[0] != 'id' && this.state.describeModule[row[0]] && show_header  < this.state.counShowHeader){
+                                        if (row[0] != 'id' && this.state.describeModule[row[0]] && show_header  < this.state.countShowHeader){
                                             show_header++;
                                             return (
                                                 <DataTable.Title sortDirection={( row[0] == this.state.order_by ?( this.state.order == 'DESC')?"ascending":"descending":'')} key={row[0]} onPress={() => this.setOrder(row[0])}>{this.state.describeModule[row[0]].label}</DataTable.Title>
@@ -189,7 +189,7 @@ class List extends Component {
                                         return (
                                             <DataTable.Row key={record[1]['id']} style={styles.DataTableHeader} onPress={() => this.setModuleID(record[1]['id'])}>
                                                 { (Object.entries(record[1]).map((row ) => {
-                                                    if (row[0] != 'id' && this.state.describeModule[row[0]] && show_header  < this.state.counShowHeader){
+                                                    if (row[0] != 'id' && this.state.describeModule[row[0]] && show_header  < this.state.countShowHeader){
                                                         show_header++;
                                                         if(this.state.describeModule[row[0]]['type'].name == 'picklist'){
                                                             return (

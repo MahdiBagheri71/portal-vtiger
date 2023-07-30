@@ -1,7 +1,7 @@
 import  { Component } from 'react'
 import {View, Text, StyleSheet,Linking  } from 'react-native'
 
-import '../../global.js' 
+import {color_bg} from '../../global.js'
 class Footer extends Component {
 
     componentWillUnmount() {

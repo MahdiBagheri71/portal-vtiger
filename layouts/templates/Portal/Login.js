@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import {View, Text, TouchableOpacity, TextInput, StyleSheet,Modal,ScrollView } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {  Divider,Button } from 'react-native-paper';
-import '../../../global.js' 
+
+import {color_bg,btn_success} from '../../../global.js'
 import {vtranslate,updateLang,ping,fetchModules,forgotPassword} from '../../../Functions/Portal';
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from 'react-native-vector-icons/AntDesign';
