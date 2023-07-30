@@ -23,11 +23,13 @@
     "react-dom": "17.0.2",
     "react-native": "0.68.2",
     "react-native-base64": "^0.2.1",
+    "react-native-dotenv": "^3.4.9",
     "react-native-dropdown-listpicker": "^1.1.4",
     "react-native-element-dropdown": "^2.0.0",
     "react-native-form-validator": "^0.5.1",
     "react-native-navigation": "^7.28.0",
     "react-native-paper": "^4.12.2",
+    "react-native-svg-transformer": "^1.1.0",
     "react-native-ui-xg": "^0.0.6",
     "react-native-vector-icons": "^9.2.0",
     "react-native-web": "0.17.7"

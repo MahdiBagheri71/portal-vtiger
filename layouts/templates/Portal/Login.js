@@ -75,7 +75,7 @@ class Login extends Component {
       }else{
          this.state.disableButton = true;
          this.setState({ 'disableButton': true });
-         var login = await ping(email,pass);
+         let login = await ping(email,pass);
          if(login =='login :) '){
             AsyncStorage.setItem('email', email);
             AsyncStorage.setItem('password', pass);
@@ -86,7 +86,7 @@ class Login extends Component {
             // NativeModules.DevSettings.reload();
             this.setState({ loginView: 'false' });
             this.setState({ module: 'Home' });
-            var fetch_modules = await fetchModules(email,pass);
+            let fetch_modules = await fetchModules(email,pass);
             if(fetch_modules){
                AsyncStorage.setItem('fetch_modules', JSON.stringify(fetch_modules));
                this.setState({ loginView: 'false' });
