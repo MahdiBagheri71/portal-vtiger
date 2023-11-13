@@ -26,13 +26,13 @@ Node.js npm or yarn React Native CLI Expo CLI (optional)
 A step by step series of examples that tell you how to get a development environment running:
 
 
-Clone the repository:
+#### Clone the repository:
 
 
 ```bash
 git clone https://github.com/mahdibagheri71/portal-vtiger.git
 ```
-Install dependencies:
+#### Install dependencies:
 
 ```bash
 cd portal-vtiger
@@ -46,7 +46,7 @@ bash
 yarn install
 ```
 
-Start the development server:
+#### Start the development server:
 
 ```bash
 npm start
